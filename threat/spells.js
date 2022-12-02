@@ -16,10 +16,10 @@ function getThreatCoefficient(values) {
 }
 
 const preferredSpellSchools = {
-    Mage: 16,		// Frost
-    Priest: 2,		// Holy
-    Paladin: 2,		// Holy
-    Warlock: 32,	// Shadow
+    Mage: 16,        // Frost
+    Priest: 2,        // Holy
+    Paladin: 2,        // Holy
+    Warlock: 32,    // Shadow
     // Others will be defaulted to 1 = physical
 }
 
@@ -45,20 +45,19 @@ const buffNames = {
 }
 
 const buffMultipliers = {
-    1038: getThreatCoefficient(0.7),		// BoS
-    40618: getThreatCoefficient(0),		// Gurtogg Insignificance
-    25895: getThreatCoefficient(0.7),		// GBoS
-    25909: getThreatCoefficient(0.8),		// Tranquil Air Totem Aura
-    71: getThreatCoefficient(1.3),		// Defensive Stance
-    2457: getThreatCoefficient(0.8),		// Battle Stance
-    2458: getThreatCoefficient(0.8),		// Berserker Stance
-    5487: getThreatCoefficient(1.3),		// Bear Form
-    9634: getThreatCoefficient(1.3),		// Dire Bear Form
-    768: getThreatCoefficient(0.71),		// Cat Form
-    25780: getThreatCoefficient({2: 1.6}),	// Righteous Fury
-    26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
-    2613: getThreatCoefficient(1.02),		// gloves enchants
-    2621: getThreatCoefficient(0.98),		// subtlety enchants
+    40618: getThreatCoefficient(0),         // Gurtogg Insignificance
+    25895: getThreatCoefficient(0.7),       // GBoS
+    25909: getThreatCoefficient(0.8),       // Tranquil Air Totem Aura
+    71: getThreatCoefficient(1.3),          // Defensive Stance
+    2457: getThreatCoefficient(0.8),        // Battle Stance
+    2458: getThreatCoefficient(0.8),        // Berserker Stance
+    5487: getThreatCoefficient(2.07),       // Bear Form
+    9634: getThreatCoefficient(2.07),       // Dire Bear Form
+    768: getThreatCoefficient(0.71),        // Cat Form
+    25780: getThreatCoefficient(1.8),       // Righteous Fury
+    26400: getThreatCoefficient(0.3),       // Fetish of the Sand Reaver
+    2613: getThreatCoefficient(1.02),       // gloves enchants
+    2621: getThreatCoefficient(0.98),       // subtlety enchants
 }
 
 // The leaf elements are functions (buffs,rank) => threatCoefficient
@@ -91,57 +90,73 @@ const talents = {
         },
     },
     Druid: {
-        "Feral Instinct": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(5487 in buffs) && !(9634 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient((1.3 + 0.05 * rank) / 1.3);
-            }
         },
         "Subtlety": {
-            maxRank: 5,
-            coeff: (_, rank = 5, spellId) => getThreatCoefficient(1 - 0.04 * rank * (spellId in {
-                8936: true,
-                8938: true,
-                8940: true,
-                8941: true,
-                9750: true,
-                9856: true,
-                9857: true,
-                9858: true,
-                26980: true,
-                774: true,
-                1058: true,
-                1430: true,
-                2090: true,
-                2091: true,
-                3627: true,
-                8910: true,
-                9839: true,
-                9840: true,
-                9841: true,
-                25299: true,
-                26981: true,
-                26982: true,
-                26982: true,
-                5185: true,
-                5186: true,
-                5187: true,
-                5188: true,
-                5189: true,
-                6778: true,
-                8903: true,
-                9758: true,
-                9888: true,
-                9889: true,
-                25297: true,
-                26978: true,
-                26979: true,
-                740: true,
-                8918: true,
-                9862: true,
-                9863: true,
-                26983: true,
+            maxRank: 3,
+            coeff: (_, rank = 3, spellId) => getThreatCoefficient(1 - 0.10 * rank * (spellId in {
+                8936: true,  // Regrowth R1
+                8938: true,  // Regrowth R2
+                8940: true,  // Regrowth R4
+                8941: true,  // Regrowth R5
+                9750: true,  // Regrowth R6
+                9856: true,  // Regrowth R7
+                9857: true,  // Regrowth R8
+                9858: true,  // Regrowth R9
+                26980: true, // Regrowth R10
+                48442: true, // Regrowth R11
+                48443: true, // Regrowth R12
+                774: true,   // Rejuv R1  
+                1058: true,  // Rejuv R2   
+                1430: true,  // Rejuv R3   
+                2090: true,  // Rejuv R4   
+                2091: true,  // Rejuv R5   
+                3627: true,  // Rejuv R6   
+                8910: true,  // Rejuv R7   
+                9839: true,  // Rejuv R8   
+                9840: true,  // Rejuv R9   
+                9841: true,  // Rejuv R10   
+                25299: true, // Rejuv R11    
+                26981: true, // Rejuv R12    
+                26982: true, // Rejuv R13    
+                48440: true, // Rejuv R14       
+                48441: true, // Rejuv R15
+                5185: true,  // Healing Touch R1             
+                5186: true,  // Healing Touch R2            
+                5187: true,  // Healing Touch R3            
+                5188: true,  // Healing Touch R4            
+                5189: true,  // Healing Touch R5            
+                6778: true,  // Healing Touch R6            
+                8903: true,  // Healing Touch R7            
+                9758: true,  // Healing Touch R8            
+                9888: true,  // Healing Touch R9            
+                9889: true,  // Healing Touch R10            
+                25297: true, // Healing Touch R11            
+                26978: true, // Healing Touch R12            
+                26979: true, // Healing Touch R13            
+                48377: true, // Healing Touch R14            
+                48378: true, // Healing Touch R15            
+                740: true,   // Tranquility R1              
+                8918: true,  // Tranquility R2                 
+                9862: true,  // Tranquility R3                 
+                9863: true,  // Tranquility R4                 
+                26983: true, // Tranquility R5                 
+                48446: true, // Tranquility R6                 
+                48447: true, // Tranquility R7                 
+                48447: true, // Tranquility R7                 
+                2893: true,  // Abolish Poison
+                5420: true,  // Tree of Life
+                29166: true, // Innervate
+                33763: true, // Lifebloom R1 (periodic)
+                48450: true, // Lifebloom R2 (periodic)
+                48451: true, // Lifebloom R3 (periodic)
+                48438: true, // Wildgrowth R1
+                53248: true, // Wildgrowth R2
+                53249: true, // Wildgrowth R3
+                53251: true, // Wildgrowth R4
+                48470: true, // Gift of the Wild R4
+                
+
+
             })),
         }
     },
@@ -160,28 +175,20 @@ const talents = {
         }
     },
     Paladin: {
-        "Improved Righteous Fury": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(25780 in buffs)) return getThreatCoefficient(1);
-                let amp = 1 + Math.floor(rank * 50 / 3) / 100;
-                return getThreatCoefficient({2: (1 + 0.6 * amp) / 1.6});
-            }
-        },
         "Fanaticism": {
-            maxRank: 5,
+            maxRank: 3,
             coeff: function (buffs, rank = 0) {
-                // Not modifying when righteous fury is up
+                // Ignore fanaticism when righteous fury is up
                 if ((25780 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient(1 - (0.06 * rank));
+                return getThreatCoefficient(1.0 - (0.10 * rank));
             }
         }
     },
 
     Priest: {
         "Silent Resolve": {
-            maxRank: 5,
-            coeff: (_, rank = 5) => getThreatCoefficient(1 - 0.04 * rank),
+            maxRank: 3,
+            coeff: (_, rank = 3) => getThreatCoefficient(1 - Math.floor(0.20/3) * rank),
         },
         "Shadow Affinity": {
             maxRank: 3,
@@ -197,7 +204,9 @@ const talents = {
                 8010: true,
                 10466: true,
                 10467: true,
-                10468: true, // Lesser Healing Wave
+                10468: true,
+                49275: true,
+                49276: true, // Lesser Healing Wave
                 331: true,
                 332: true,
                 547: true,
@@ -207,10 +216,20 @@ const talents = {
                 8005: true,
                 10395: true,
                 10396: true,
-                25357: true, // Healing Wave
+                25357: true, 
+                49272: true,
+                49273: true, // Healing Wave
                 1064: true,
                 10622: true,
-                10623: true, // Chain Heal
+                10623: true,
+                10623: true,
+                10623: true,
+                55458: true,
+                55459: true, // Chain Heal
+                61295: true,
+                61299: true,
+                61300: true,
+                61301: true, // Riptide
             })),
         },
         "Spirit Weapons": {
@@ -240,25 +259,25 @@ const talents = {
     Warlock: {
         "Destructive Reach": {
             maxRank: 2,
-            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.05 * rank),
+            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
     }
 }
 
-// These make dots green-bordered
+// These make invulnerabilities green-bordered
 const invulnerabilityBuffs = {
     498: "Divine Protection",
     5573: "Divine Protection",
     642: "Divine Shield",
     1020: "Divine Shield",
-    1022: "Blessing of Protection",
-    5599: "Blessing of Protection",
-    10278: "Blessing of Protection",
+    1022: "Hand of Protection",
+    5599: "Hand of Protection",
+    10278: "Hand of Protection",
     11958: "Ice Block",
     19752: "Divine Intervention",
     6724: "Light of Elune",
 }
-// These make dots yellow-bordered
+// These make threat suspends yellow-bordered
 const aggroLossBuffs = {
     118: true, 12824: true, 12825: true, 28272: true, 28271: true, 12826: true, // Mages' Polymorph
     23023: true, // Razorgore Conflagrate
@@ -269,20 +288,20 @@ const aggroLossBuffs = {
     23603: true, // Nefarian: Wild Polymorph
     26580: true, // Princess Yauj: Fear
 }
-// These make dots orange
+// These make fixates orange
 const fixateBuffs = {
-    40604: true, // Gurtogg Fel Rage
+    40604: true, // Gurtogg Fel Rage ((FIXATE))
     355: true, // Taunt
-    1161: true, // Challenging Shout ((FIXATE)) TODO:: change color of fixates
-    5209: true, // Challenging Roar
+    1161: true, // Challenging Shout ((FIXATE))
+    5209: true, // Challenging Roar ((FIXATE))
     6795: true, // Growl
-    694: true, // Mocking Blow
+    694: true, // Mocking Blow ((FIXATE))
     29060: true, // Deathknight Understudy Taunt
     62124: true, // Hand of Reckoning
     31789: true, // Righteous Defense
     56222: true, // Dark Command
     49576: true, // Death Grip
-    20736: true, // Distracting Shot ((FIXATE)) TODO:: change color of fixates
+    20736: true, // Distracting Shot ((FIXATE))
     29060: true, // Deathknight Understudy Taunt
 }
 // These make a dot in the graph on application and removal
@@ -1405,9 +1424,9 @@ const spellFunctions = {
     // TODO : Need to double check if slow/stun effects add threat modifier on some explosives
 
     /* Zero Threat Abilities */
-    71: handler_zero,		// Defensive Stance
-    2457: handler_zero,		// Battle Stance
-    2458: handler_zero,		// Berserker Stance
+    71: handler_zero,        // Defensive Stance
+    2457: handler_zero,        // Battle Stance
+    2458: handler_zero,        // Berserker Stance
     20572: handler_zero, //("Blood Fury"), //Blood Fury
     26296: handler_zero, //("Berserking (Troll racial)"), //Berserking (Troll racial)
     26635: handler_zero, //("Berserking (Troll racial)"), //Berserking (Troll racial)

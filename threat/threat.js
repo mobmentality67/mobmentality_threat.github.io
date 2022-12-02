@@ -563,9 +563,6 @@ class Player extends Unit {
                             }
                             break;
                         case "Druid" :
-                            if (talents[1].id < 8) {
-                                this.talents["Feral Instinct"].rank = 0;
-                            }
                             break;
                         case "Paladin" :
                             if (talents[1].id < 13) {

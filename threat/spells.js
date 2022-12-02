@@ -90,7 +90,6 @@ const talents = {
         },
     },
     Druid: {
-        },
         "Subtlety": {
             maxRank: 3,
             coeff: (_, rank = 3, spellId) => getThreatCoefficient(1 - 0.10 * rank * (spellId in {

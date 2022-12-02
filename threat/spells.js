@@ -255,7 +255,6 @@ const invulnerabilityBuffs = {
     5599: "Blessing of Protection",
     10278: "Blessing of Protection",
     11958: "Ice Block",
-    3169: "LIP", // Limited Invulnerability Potion
     19752: "Divine Intervention",
     6724: "Light of Elune",
 }
@@ -272,12 +271,18 @@ const aggroLossBuffs = {
 }
 // These make dots orange
 const fixateBuffs = {
+    40604: true, // Gurtogg Fel Rage
     355: true, // Taunt
-    1161: true, // Challenging Shout
+    1161: true, // Challenging Shout ((FIXATE)) TODO:: change color of fixates
     5209: true, // Challenging Roar
     6795: true, // Growl
-    40604: true, // Gurtogg Fel Rage
-    694: true, 7400: true, 7402: true, 20559: true, 20560: true, // Mocking Blow
+    694: true, // Mocking Blow
+    29060: true, // Deathknight Understudy Taunt
+    62124: true, // Hand of Reckoning
+    31789: true, // Righteous Defense
+    56222: true, // Dark Command
+    49576: true, // Death Grip
+    20736: true, // Distracting Shot ((FIXATE)) TODO:: change color of fixates
     29060: true, // Deathknight Understudy Taunt
 }
 // These make a dot in the graph on application and removal

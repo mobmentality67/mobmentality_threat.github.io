@@ -29,9 +29,7 @@ const baseThreatCoefficients = {
 }
 
 const buffNames = {
-    1038: "Blessing of Salvation",
-    25895: "Greater Blessing of Salvation",
-    25909: "Tranquil Air Totem",
+    1038: "Hand of Salvation",
     71: "Defensive Stance",
     2457: "Battle Stance",
     2458: "Berserker Stance",
@@ -39,6 +37,9 @@ const buffNames = {
     9634: "Dire Bear Form",
     768: "Cat Form",
     25780: "Righteous Fury",
+    48236: "Frost Presence",
+    48266: "Blood Presence",
+    48265: "Unholy Presence",
     35079: "Misdirection",
     2613: "Enchant : Threat on gloves",
     2621: "Enchant : Subtlety",
@@ -59,6 +60,7 @@ const buffMultipliers = {
     26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
     2613: getThreatCoefficient(1.02),		// gloves enchants
     2621: getThreatCoefficient(0.98),		// subtlety enchants
+    292322: getThreatCoefficient(0),        // Loatheb fungal creep
 }
 
 // The leaf elements are functions (buffs,rank) => threatCoefficient

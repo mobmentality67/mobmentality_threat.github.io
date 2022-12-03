@@ -1152,51 +1152,35 @@ const spellFunctions = {
     // TODO: fade suspension
 
 // Warlock
-    603: handler_threatOnDebuffOrDamage(120), // Curse of Doom
+    47867: handler_threatOnDebuffOrDamage(160), // Curse of Doom
     18223: handler_zero, // Curse of Exhaustion
-    704: handler_threatOnDebuff(2 * 14), // CoR r1
-    7658: handler_threatOnDebuff(2 * 28), // CoR r2
-    7659: handler_threatOnDebuff(2 * 42), // CoR r3
-    11717: handler_threatOnDebuff(2 * 56), // CoR r4
-    17862: handler_threatOnDebuff(2 * 44), // CoS r1
-    17937: handler_threatOnDebuff(2 * 56), // CoS r2
-    1714: handler_threatOnDebuff(2 * 26), // CoT r1
-    11719: handler_threatOnDebuff(2 * 50), // CoT r2
-    702: handler_threatOnDebuff(2 * 4), // CoW r1
-    1108: handler_threatOnDebuff(2 * 12), // CoW r2
-    6205: handler_threatOnDebuff(2 * 22), // CoW r3
-    7646: handler_threatOnDebuff(2 * 32), // CoW r4
-    11707: handler_threatOnDebuff(2 * 42), // CoW r5
-    11708: handler_threatOnDebuff(2 * 52), // CoW r6
-    1490: handler_threatOnDebuff(2 * 32), // CotE r1
-    11721: handler_threatOnDebuff(2 * 46), // CotE r2
-    11722: handler_threatOnDebuff(2 * 60), // CotE r3
+    50511: handler_threatOnDebuff(142), // Curse of Weakness
+    17937: handler_threatOnDebuff(112), // Curse of Elements
+    11719: handler_threatOnDebuff(100), // Curse of Tongues
     1454: handler_zero, // Life Tap r1
     1455: handler_zero, // Life Tap r2
     1456: handler_zero, // Life Tap r3
     11687: handler_zero, // Life Tap r4
     11688: handler_zero, // Life Tap r5
     11689: handler_zero, // Life Tap r6
+    27222: handler_zero, // Life Tap r7
+    57946: handler_zero, // Life Tap r8
     31818: handler_zero, // Life Tap script
-    5138: handler_zero, // Drain Mana r1
-    6226: handler_zero, // Drain Mana r2
-    11703: handler_zero, // Drain Mana r3
-    11704: handler_zero, // Drain Mana r4
+    5138: handler_zero, // Drain Mana
     689: handler_damage, // Drain Life r1
     699: handler_damage, // Drain Life r2
     709: handler_damage, // Drain Life r3
     7651: handler_damage, // Drain Life r4
     11699: handler_damage, // Drain Life r5
     11700: handler_damage, // Drain Life r6
-    18265: handler_threatOnDebuffOrDamage(2 * 30), // Siphon Life r1
-    18879: handler_threatOnDebuffOrDamage(2 * 38), // Siphon Life r2
-    18880: handler_threatOnDebuffOrDamage(2 * 48), // Siphon Life r3
-    18881: handler_threatOnDebuffOrDamage(2 * 58), // Siphon Life r4
-    710: handler_threatOnDebuff(2 * 28), // Banish r1
-    18647: handler_threatOnDebuff(2 * 48), // Banish r2
-    5782: handler_threatOnDebuff(2 * 8), // Fear r1
-    6213: handler_threatOnDebuff(2 * 32), // Fear r2
-    6215: handler_threatOnDebuff(2 * 56), // Fear r3
+    11700: handler_damage, // Drain Life r7
+    63106: handler_modHeal(.5) //Siphon Life
+    47856: handler_modHeal(.5) //Blood Funnel
+    47893: handler_modHeal(0.0) //Fel Armor
+    54181: handler_modHeal(0.0) //Fel Synergy
+    710: handler_threatOnDebuff(56), // Banish r1
+    18647: handler_threatOnDebuff(56), // Banish r2
+    6215: handler_threatOnDebuff(112), // Fear
     172: handler_damage, // Corruption r1
     6222: handler_damage, // Corruption r2
     6223: handler_damage, // Corruption r3
@@ -1204,27 +1188,28 @@ const spellFunctions = {
     11671: handler_damage, // Corruption r5
     11672: handler_damage, // Corruption r6
     25311: handler_damage, // Corruption r7
+    47812: handler_damage, // Corruption r8
+    47813: handler_damage, // Corruption r9
     980: handler_damage, // CoA r1
     1014: handler_damage, // CoA r2
     6217: handler_damage, // CoA r3
     11711: handler_damage, // CoA r4
     11712: handler_damage, // CoA r5
     11713: handler_damage, // CoA r6
-    6789: handler_damage, // Death Coil r1
-    17925: handler_damage, // Death Coil r2
-    17926: handler_damage, // Death Coil r3
+    27218: handler_damage, // CoA r7
+    47863: handler_damage, // CoA r8
+    47864: handler_damage, // CoA r9
+    47860: handler_damage, // Death Coil - healing does 0 threat
     1120: handler_damage, // Drain Soul r1
     8288: handler_damage, // Drain Soul r2
     8289: handler_damage, // Drain Soul r3
     11675: handler_damage, // Drain Soul r4
-    5484: handler_threatOnDebuff(2 * 40), // Howl of Terror r1
+    27217: handler_damage, // Drain Soul r5
+    47855: handler_damage, // Drain Soul r6
+    50577: handler_threatOnDebuff(2 * 40), // Howl of Terror r1
     17928: handler_threatOnDebuff(2 * 54), // Howl of Terror r2
-    5676: handler_modDamage(2), // Searing Pain r1
-    17919: handler_modDamage(2), // Searing Pain r2
-    17920: handler_modDamage(2), // Searing Pain r3
-    17921: handler_modDamage(2), // Searing Pain r4
-    17922: handler_modDamage(2), // Searing Pain r5
-    17923: handler_modDamage(2), // Searing Pain r6
+    47815: handler_modDamage(2), // Searing Pain r10
+
 
     //29858: handler_bossDropThreatOnCast(0.5),// Soulshatter
     29858: handler_partialThreatWipeOnCast(.5),// Soulshatter
@@ -1243,12 +1228,20 @@ const spellFunctions = {
     10413: handler_modDamage(1), // Earth Shock r6
     10414: handler_modDamage(1), // Earth Shock r7
     25454: handler_modDamage(1), // Earth Shock r8
+    49230: handler_modDamage(1), // Earth Shock r9
+    49231: handler_modDamage(1), // Earth Shock r10
+    193796: handler_modDamage(1), // Flametongue Attack
+    61654: handler_modDamage(1), // Fire Nova
+
 
     8056: handler_modDamage(2), // Frost Shock r1
     8058: handler_modDamage(2), // Frost Shock r2
     10472: handler_modDamage(2), // Frost Shock r3
     10473: handler_modDamage(2), // Frost Shock r4
     25464: handler_modDamage(2), // Frost Shock r5
+    49235: handler_modDamage(2), // Frost Shock r6
+    49236: handler_modDamage(2), // Frost Shock r7
+
 
     16246: handler_zero, // Clearcasting
     8516: handler_zero, // Windfury Attack (buff only) R1
@@ -1284,6 +1277,8 @@ const spellFunctions = {
     45294: handler_zero, // Rank 10
     45295: handler_zero, // Rank 11
     45296: handler_zero, // Rank 12
+    49237: handler_zero, // Rank 13
+    49238: handler_zero, // Rank 14
 
     // Chain lightnings
     45297: handler_zero, // Rank 1
@@ -1291,10 +1286,13 @@ const spellFunctions = {
     45299: handler_zero, // Rank 3
     45300: handler_zero, // Rank 4
     45301: handler_zero, // Rank 5
-    45302: handler_zero, // Rank 6*
+    45302: handler_zero, // Rank 6
+    49270: handler_zero, // Rank 7
+    49271: handler_zero, // Rank 8
+
 
     // Elemental mastery
-    16166: handler_zero, // Rank 6
+    64701: handler_zero, // EM
 
 // From ResultsMayVary https://resultsmayvary.github.io/ClassicThreatPerSecond/
     1: handler_damage,

@@ -246,6 +246,12 @@ const talents = {
             coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
     }
+    Death Knight: {
+        "Subversion": {
+            maxRank: 3,
+            coeff: (_, rank = 3) => getThreatCoefficient(1 - 0.25/3 * rank),
+        }
+    }
 }
 
 // These make dots green-bordered
@@ -1118,8 +1124,8 @@ const spellFunctions = {
     48947: handler_zero, // Fire Resistance Aura
     48945: handler_zero, // Frost Resistance Aura
     48943: handler_zero, // Shadow Resistance Aura
-    54043: handler_damage, // Retribution Aura
-    31821: handler_damage, // Aura Mastery
+    54043: handler_zero, // Retribution Aura
+    31821: handler_zero, // Aura Mastery
 
     48782: handler_modHeal(.5), // Holy Light
     48785: handler_modHeal(.5), // Flash of Light
@@ -1597,6 +1603,40 @@ const spellFunctions = {
     9892: handler_castCanMiss(-600, "Cower"),
     31709: handler_castCanMiss(-800, "Cower"),
     27004: handler_castCanMiss(-1170, "Cower"),
+
+    // Death Knight
+    49909: handler_modDamage(7),    // IT is 7x threat in Frost, 1x in Blood/Unholy (before stance multipliers)
+    52212: handler_modDamage(1.9),  // Death and Decay
+    66217: handler_modDamage(1.75),  // Rune Strike
+
+    49895: handler_modDamagePlusThreat(1.0, 100), // Death Coil
+    49924: handler_modDamagePlusThreat(1.0, 164), // Death Strike; heal has 164 base threat component
+    55271: handler_modDamagePlusThreat(1.0, 120), // Scourge Strike
+
+    45524: handler_threatOnDebuffOrDamage(116), // Chains of Ice
+    49203: handler_threatOnDebuffOrDamage(110), // Hungering Cold
+    49916: handler_threatOnDebuffOrDamage(138), // Strangulate
+    49016: handler_threatOnDebuffOrDamage(55), // Unholy Frenzy
+
+    49182: handler_threatOnBuff(20), // Blade Barrier 1/5
+    49500: handler_threatOnBuff(20), // Blade Barrier 2/5
+    49501: handler_threatOnBuff(20), // Blade Barrier 3/5
+    55255: handler_threatOnBuff(20), // Blade Barrier 4/5
+    55226: handler_threatOnBuff(20), // Blade Barrier 5/5
+    57330: handler_threatOnBuff(75), // HoW R1
+    57263: handler_threatOnBuff(75), // HoW R2
+    49796: handler_threatOnBuff(55), // Deathchill
+    49206: handler_threatOnBuff(220), // Summon Gargoyle
+    46584: handler_threatOnBuff(1), // Raise Dead
+
+    49576: threatFunctions.concat(handler_damage, handler_markSourceOnMiss(borders.taunt)), // Death Grip
+    49576: handler_threatOnDebuffOrDamage(110), // Grip generates 110 threat pre-stance mod after taunt effect
+
+    45470: handler_modHeal(.55), // Death Strike
+    48982: handler_modHeal(.55), // Rune Tap // TODO: also generates 55 base threat
+
+    // TODO: deal with 1x multiplier in unholy/blood for IT
+    // TODO: deal with dancing rune weapon threat transfer (maybe)
 
     /* Healing */
     // As of mars 30 2022, blizzard apparently changed final tick of life bloom's behaviour

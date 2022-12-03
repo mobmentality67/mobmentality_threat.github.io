@@ -17,9 +17,12 @@ function getThreatCoefficient(values) {
 
 const preferredSpellSchools = {
     Mage: 16,		// Frost
+    //Mage: 4,		// Fire
+    //Mage: 62,		// Arcane
     Priest: 2,		// Holy
     Paladin: 2,		// Holy
     Warlock: 32,	// Shadow
+    //Boomkin: 8,   // Nature
     // Others will be defaulted to 1 = physical
 }
 
@@ -47,8 +50,8 @@ const buffNames = {
 }
 
 const buffMultipliers = {
-    40618: getThreatCoefficient(0),		// Gurtogg Insignificance
-    71: getThreatCoefficient(1.3),		// Defensive Stance
+    40618: getThreatCoefficient(0),		    // Gurtogg Insignificance
+    71: getThreatCoefficient(1.3),		    // Defensive Stance
     2457: getThreatCoefficient(0.8),		// Battle Stance
     2458: getThreatCoefficient(0.8),		// Berserker Stance
     48236: getThreatCoefficient(2.0735),	// Frost Presence
@@ -57,7 +60,7 @@ const buffMultipliers = {
     5487: getThreatCoefficient(1.3),		// Bear Form
     9634: getThreatCoefficient(1.3),		// Dire Bear Form
     768: getThreatCoefficient(0.71),		// Cat Form
-    25780: getThreatCoefficient(1.8),	// Righteous Fury
+    25780: getThreatCoefficient(1.8),	    // Righteous Fury
     26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
     2613: getThreatCoefficient(1.02),		// gloves enchants
     2621: getThreatCoefficient(0.98),		// subtlety enchants
@@ -156,7 +159,7 @@ const talents = {
         },
         "Burning Soul": {
             maxRank: 2,
-            coeff: (_, rank = 2) => getThreatCoefficient({4: 1 - 0.05 * rank}),
+            coeff: (_, rank = 2) => getThreatCoefficient({4: 1 - 0.1 * rank}),
         },
         "Frost Channeling": {
             maxRank: 3,
@@ -164,16 +167,8 @@ const talents = {
         }
     },
     Paladin: {
-        "Improved Righteous Fury": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(25780 in buffs)) return getThreatCoefficient(1);
-                let amp = 1 + Math.floor(rank * 50 / 3) / 100;
-                return getThreatCoefficient({2: (1 + 0.6 * amp) / 1.6});
-            }
-        },
         "Fanaticism": {
-            maxRank: 5,
+            maxRank: 3,
             coeff: function (buffs, rank = 0) {
                 // Not modifying when righteous fury is up
                 if ((25780 in buffs)) return getThreatCoefficient(1);
@@ -184,8 +179,8 @@ const talents = {
 
     Priest: {
         "Silent Resolve": {
-            maxRank: 5,
-            coeff: (_, rank = 5) => getThreatCoefficient(1 - 0.04 * rank),
+            maxRank: 3,
+            coeff: (_, rank = 5) => getThreatCoefficient(1 - 0.20/3 * rank),
         },
         "Shadow Affinity": {
             maxRank: 3,
@@ -244,7 +239,11 @@ const talents = {
     Warlock: {
         "Destructive Reach": {
             maxRank: 2,
-            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.05 * rank),
+            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
+        }
+        "Improved Drain Soul": {
+            maxRank: 2,
+            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
     }
 }
@@ -286,6 +285,7 @@ const fixateBuffs = {
     20736: true, // Distracting Shot
     56222: true, // Dark Command
     49576 true, // Death Grip
+    62124 true, // Hand of Reckoning
 
 }
 // These make a dot in the graph on application and removal
@@ -1035,12 +1035,10 @@ const spellFunctions = {
     //37676: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Leotheras demon form
     37098: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Nightbane's Rain of Bones. delay : 43 sec is the timer according to DBM
     29060: handler_taunt, // Deathknight Understudy Taunt
-    28835: handler_bossPartialThreatWipeOnCast(.5), // Mark of Zeliek
-    28834: handler_bossPartialThreatWipeOnCast(.5), // Mark of Mograine
-    28833: handler_bossPartialThreatWipeOnCast(.5), // Mark of Blaumeux
-    28832: handler_bossPartialThreatWipeOnCast(.5), // Mark of Korth'azz
-    29208: handler_bossPartialThreatWipeOnCast(0.0), // Noth's blink
-    29210: handler_bossPartialThreatWipeOnCast(0.0), // Noth's blink, no idea why 2 spellids
+    //28835: handler_bossPartialThreatWipeOnCast(.5), // Mark of Zeliek - no threat drop in WOTLK
+    //28834: handler_bossPartialThreatWipeOnCast(.5), // Mark of Mograine - no threat drop in WOTLK
+    //28833: handler_bossPartialThreatWipeOnCast(.5), // Mark of Blaumeux - no threat drop in WOTLK
+    //28832: handler_bossPartialThreatWipeOnCast(.5), // Mark of Korth'azz - no threat drop in WOTLK
 
     /*  SSC */
     25035: handler_hydrossThreatWipeOnCast, // Hydross invoc spawns
@@ -1085,156 +1083,75 @@ const spellFunctions = {
     28093: handler_zero, // Lightning speed - mongoose weapon
 
 // Paladin
-    25898: handler_threatOnBuff(60), // GBoK
-    25890: handler_threatOnBuff(60), // GBoL
-    27145: handler_threatOnBuff(69), // GBoL r2
-    27144: handler_threatOnBuff(69), // BoL r4
-    25916: handler_threatOnBuff(60), // GBoM
-    25782: handler_threatOnBuff(60), // GBoM
-    27141: handler_threatOnBuff(70), // GBoM r 3
-    27140: handler_threatOnBuff(70), // BoM r 8
-    25895: handler_threatOnBuff(60), // GBoS
-    25899: handler_threatOnBuff(60), // GBoSanc
-    27169: handler_threatOnBuff(70), // GBoSanc r 2
-    25894: handler_threatOnBuff(54), // GBoW
-    25918: handler_threatOnBuff(60), // GBoW
-    27143: handler_threatOnBuff(70), // GBoW r3
-    19742: handler_threatOnBuff(14), // BoW
-    19850: handler_threatOnBuff(24), // BoW
-    19852: handler_threatOnBuff(34), // BoW
-    19853: handler_threatOnBuff(44), // BoW
-    19854: handler_threatOnBuff(54), // BoW
-    25290: handler_threatOnBuff(60), // BoW
-    27142: handler_threatOnBuff(70), // BoW r 7
-    20293: threatFunctions.concat(handler_threatOnBuff(58), handler_damage), // Seal of Righteousness r8
-    27155: threatFunctions.concat(handler_threatOnBuff(58), handler_damage), // Seal of Righteousness r9
+    20217: handler_threatOnBuff(20), // BoK
+    43223: handler_threatOnBuff(60), // GBoK
+    48932: handler_threatOnBuff(79), // BOM
+    48934: handler_threatOnBuff(79), // GBoM
+    6940: handler_threatOnBuff(60), // Hand of Sac //TODO: Check threat value
+    20911: handler_threatOnBuff(60), // BoSanc //TODO: Check threat value
+    25899: handler_threatOnBuff(60), // GBoSanc //TODO: Check threat value
+    48936: handler_threatOnBuff(54), // BoW
+    48938: handler_threatOnBuff(54), // GBoW
+    53601: handler_threatOnBuff(28), // Sacred Shield
+    21084: threatFunctions.concat(handler_threatOnBuff(0), handler_damage), // Seal of Righteousness
+    20424: threatFunctions.concat(handler_threatOnBuff(14), handler_damage), // Seal of Command
     20286: handler_damage, // Judgement of Righteousness
-    26573: handler_damage, // Consecration r1
-    20116: handler_damage, // Consecration r2
-    20922: handler_damage, // Consecration r3
-    20923: handler_damage, // Consecration r4
-    20924: handler_damage, // Consecration r5
-    24239: handler_damage, // Hammer of Wrath
-
-    20925: handler_modDamage(1.35), // Holy Shield r1
-    20927: handler_modDamage(1.35), // Holy Shield r2
-    20928: handler_modDamage(1.35), // Holy Shield r3
-    27179: handler_modDamage(1.35), // Holy Shield r4
-
-    31935: handler_modDamage(1.3), // Avenger shield r1
-    32699: handler_modDamage(1.3), // Avenger shield r2
-    32700: handler_modDamage(1.3), // Avenger shield r3
+    20467: handler_damage, // Judgement of Command
+    48819: handler_damage, // Consecration
+    48806: handler_damage, // Hammer of Wrath
+    48801: handler_damage, // Exorcism
+    61411: handler_damage, // Shield of Righteousness
+    53595: handler_damage, // Hammer of the Righteous
+    48952: handler_damage, // Holy Shield
+    20424: handler_damage, // Seal of Command
+    48952: handler_modDamage(1.00), // Holy Shield
+    48827: handler_modDamage(1.00), // Avenger's Shield
+    1038: handler_partialThreatWipeOnEvent(0.02), // hand of salv; 2% per threat for 10s untalented
 
     31789: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Righteous Defense
+    67845: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Hand of Reckoning
+    68475: handler_modDamage(1.00), // Hand of Reckoning
+    53409: handler_zero, // Mana from Judgement of Wisdom
 
-    20268: handler_zero, // Mana from judgement of wisdom r1
-    20352: handler_zero, // Mana from judgement of wisdom r2
-    20353: handler_zero, // Mana from judgement of wisdom r3
-    27165: handler_zero, // Mana from judgement of wisdom r4
-
-    465: handler_zero, // Devotion Aura r1
-    10290: handler_zero, // Devotion Aura r2
-    643: handler_zero, // Devotion Aura r3
-    10291: handler_zero, // Devotion Aura r4
-    1032: handler_zero, // Devotion Aura r5
-    10292: handler_zero, // Devotion Aura r6
-    10293: handler_zero, // Devotion Aura r7
+    48942: handler_zero, // Devotion Aura
     19746: handler_zero, // Concentration Aura
-    19891: handler_zero, // Fire Resistance Aura r1
-    19899: handler_zero, // Fire Resistance Aura r2
-    19900: handler_zero, // Fire Resistance Aura r3
-    19888: handler_zero, // Frost Resistance Aura r1
-    19897: handler_zero, // Frost Resistance Aura r2
-    19898: handler_zero, // Frost Resistance Aura r3
-    19876: handler_zero, // Shadow Resistance Aura r1
-    19895: handler_zero, // Shadow Resistance Aura r2
-    19896: handler_zero, // Shadow Resistance Aura r3
-    7294: handler_damage, // Retribution Aura r1
-    10298: handler_damage, // Retribution Aura r2
-    10299: handler_damage, // Retribution Aura r3
-    10300: handler_damage, // Retribution Aura r4
-    10301: handler_damage, // Retribution Aura r5
-    20218: handler_zero, // Sanctity Aura
-// Paladin heals have .25 coefficient. Sources:
-// cha#0438 2018-12-04 https://discordapp.com/channels/383596811517952002/456930992557654037/519502645858271243
-//     [15:17] chaboi: but there is a grain of truth in that shitpost since paladin healing threat did get specifically nerfed by blizzard early on so they wouldnt be able to tank dungeons via just healing themselves
-//     [15:18] chaboi: which is why paladin healing threat is 0.5, which is much lower than the other healers even if they talent into threat reduc
-// 4man Onyxia https://classic.warcraftlogs.com/reports/TFqN9Z1HCxnLPypG
-//     Paladin doesn't pull threat when he should at usual .5 heal coefficient.
-    635: handler_modHeal(.5), // Holy Light r1
-    639: handler_modHeal(.5), // Holy Light r2
-    647: handler_modHeal(.5), // Holy Light r3
-    1026: handler_modHeal(.5), // Holy Light r4
-    1042: handler_modHeal(.5), // Holy Light r5
-    3472: handler_modHeal(.5), // Holy Light r6
-    10328: handler_modHeal(.5), // Holy Light r7
-    10329: handler_modHeal(.5), // Holy Light r8
-    25292: handler_modHeal(.5), // Holy Light r9
-    27135: handler_modHeal(.5), // Holy Light r10
-    27136: handler_modHeal(.5), // Holy Light r11
-    19750: handler_modHeal(.5), // Flash of Light r1
-    19939: handler_modHeal(.5), // Flash of Light r2
-    19940: handler_modHeal(.5), // Flash of Light r3
-    19941: handler_modHeal(.5), // Flash of Light r4
-    19942: handler_modHeal(.5), // Flash of Light r5
-    19943: handler_modHeal(.5), // Flash of Light r6
-    27137: handler_modHeal(.5), // Flash of Light r7
-    //633: handler_modHeal(.5), // Lay on Hands r1 - Generates a total threat of heal * .5 instead of heal * .25
-    //2800: handler_modHeal(.5), // Lay on Hands r2
-    //10310: handler_modHeal(.5), // Lay on Hands r3
-    //27154: handler_modHeal(.5), // Lay on Hands r4
-    25914: handler_modHeal(.5), // Holy Shock r1
-    25913: handler_modHeal(.5), // Holy Shock r2
-    25903: handler_modHeal(.5), // Holy Shock r3
+    48947: handler_zero, // Fire Resistance Aura
+    48945: handler_zero, // Frost Resistance Aura
+    48943: handler_zero, // Shadow Resistance Aura
+    54043: handler_damage, // Retribution Aura
+    31821: handler_damage, // Aura Mastery
+
+    48782: handler_modHeal(.5), // Holy Light
+    48785: handler_modHeal(.5), // Flash of Light
+    53652: handler_modHeal(.5), // Beacon of Light
+    48788: handler_modHeal(.5), // Lay on Hands
+    54968: handler_modHeal(.5), // Glyph of Holy Light
+    48821: handler_modHeal(.5), // Holy Shock
+    66922: handler_modHeal(.5), // Flash of Light HoT
     19968: handler_modHeal(.5), // Holy Light that appears in logs
     19993: handler_modHeal(.5), // Flash of Light that appears in logs
 
 // Mage
     10181: handler_damage, // Frostbolt
-    66: handler_partialThreatWipeOnEvent(.2), // invisibility : 20% per second of buff
+    66: handler_partialThreatWipeOnEvent(.333), // invisibility : 20% per second of buff
+    // TODO: mirror image threat suspension
 
 // Rogue
     1856: handler_vanish,
     1857: handler_vanish, // Vanish
     26889: handler_vanish, // Vanish
-    1966: handler_castCanMissNoCoefficient(-150), // Feint r1
-    6768: handler_castCanMissNoCoefficient(-240), // Feint r2
-    8637: handler_castCanMissNoCoefficient(-390), // Feint r3
-    11303: handler_castCanMissNoCoefficient(-600), // Feint r4
-    25302: handler_castCanMissNoCoefficient(-800), // Feint r5
+    25302: handler_castCanMissNoCoefficient(-1535), // Feint; Wowhead value is 2162, supposedly still modded by 0.71
 
 // Priest
     6788: handler_zero, // Weakened Soul
 
-    // mind blast no longer increase threat in tbc
-    // https://wowwiki-archive.fandom.com/wiki/Mind_Blast
-    8092: handler_damage, // Mind Blast r1
-    8102: handler_damage, // Mind Blast r2
-    8103: handler_damage, // Mind Blast r3
-    8104: handler_damage, // Mind Blast r4
-    8105: handler_damage, // Mind Blast r5
-    8106: handler_damage, // Mind Blast r6
-    10945: handler_damage, // Mind Blast r7
-    10946: handler_damage, // Mind Blast r8
-    10947: handler_damage, // Mind Blast r9
-    25372: handler_damage, // Mind Blast r10
-    25375: handler_damage, // Mind Blast r11
+    48127: handler_damage, // Mind Blast
 
-    15237: handler_zero, // Holy Nova r1
-    15430: handler_zero, // Holy Nova r2
-    15431: handler_zero, // Holy Nova r3
-    27799: handler_zero, // Holy Nova r4
-    27800: handler_zero, // Holy Nova r5
-    27801: handler_zero, // Holy Nova r6
-    23455: handler_zero, // Holy Nova r1
-    23458: handler_zero, // Holy Nova r2
-    23459: handler_zero, // Holy Nova r3
-    27803: handler_zero, // Holy Nova r4
-    27804: handler_zero, // Holy Nova r5
-    27805: handler_zero, // Holy Nova r6
+    48076: handler_zero, // Holy Nova heal
+    48078: handler_zero, // Holy Nova damage
+    // TODO: fade suspension
 
 // Warlock
-    18288: handler_zero, // Amplify Curse
     603: handler_threatOnDebuffOrDamage(120), // Curse of Doom
     18223: handler_zero, // Curse of Exhaustion
     704: handler_threatOnDebuff(2 * 14), // CoR r1

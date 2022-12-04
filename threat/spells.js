@@ -16,10 +16,13 @@ function getThreatCoefficient(values) {
 }
 
 const preferredSpellSchools = {
-    Mage: 16,        // Frost
-    Priest: 2,        // Holy
-    Paladin: 2,        // Holy
-    Warlock: 32,    // Shadow
+    Mage: 16,		// Frost
+    //Mage: 4,		// Fire
+    //Mage: 62,		// Arcane
+    Priest: 2,		// Holy
+    Paladin: 2,		// Holy
+    Warlock: 32,	// Shadow
+    //Boomkin: 8,   // Nature
     // Others will be defaulted to 1 = physical
 }
 
@@ -43,22 +46,26 @@ const buffNames = {
     35079: "Misdirection",
     2613: "Enchant : Threat on gloves",
     2621: "Enchant : Subtlety",
+    50720: "Vigilance",
 }
 
 const buffMultipliers = {
-    40618: getThreatCoefficient(0),         // Gurtogg Insignificance
-    25895: getThreatCoefficient(0.7),       // GBoS
-    25909: getThreatCoefficient(0.8),       // Tranquil Air Totem Aura
-    71: getThreatCoefficient(1.3),          // Defensive Stance
-    2457: getThreatCoefficient(0.8),        // Battle Stance
-    2458: getThreatCoefficient(0.8),        // Berserker Stance
-    5487: getThreatCoefficient(2.07),       // Bear Form
-    9634: getThreatCoefficient(2.07),       // Dire Bear Form
-    768: getThreatCoefficient(0.71),        // Cat Form
-    25780: getThreatCoefficient(1.8),       // Righteous Fury
-    26400: getThreatCoefficient(0.3),       // Fetish of the Sand Reaver
-    2613: getThreatCoefficient(1.02),       // gloves enchants
-    2621: getThreatCoefficient(0.98),       // subtlety enchants
+    40618: getThreatCoefficient(0),		    // Gurtogg Insignificance
+    71: getThreatCoefficient(1.3),		    // Defensive Stance
+    2457: getThreatCoefficient(0.8),		// Battle Stance
+    2458: getThreatCoefficient(0.8),		// Berserker Stance
+    48236: getThreatCoefficient(2.0735),	// Frost Presence
+    48266: getThreatCoefficient(0.8),		// Blood Presence
+    48265: getThreatCoefficient(0.8),		// Unholy Presence
+    5487: getThreatCoefficient(1.3),		// Bear Form
+    9634: getThreatCoefficient(1.3),		// Dire Bear Form
+    768: getThreatCoefficient(0.71),		// Cat Form
+    25780: getThreatCoefficient(1.8),	    // Righteous Fury
+    26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
+    2613: getThreatCoefficient(1.02),		// gloves enchants
+    2621: getThreatCoefficient(0.98),		// subtlety enchants
+    292322: getThreatCoefficient(0),        // Loatheb fungal creep
+    50720: getThreatCoefficient(0.9)        // Vigilance
 }
 
 // The leaf elements are functions (buffs,rank) => threatCoefficient
@@ -99,68 +106,49 @@ const talents = {
             }
         },
         "Subtlety": {
-            maxRank: 3,
-            coeff: (_, rank = 3, spellId) => getThreatCoefficient(1 - 0.10 * rank * (spellId in {
-                8936: true,  // Regrowth R1
-                8938: true,  // Regrowth R2
-                8940: true,  // Regrowth R4
-                8941: true,  // Regrowth R5
-                9750: true,  // Regrowth R6
-                9856: true,  // Regrowth R7
-                9857: true,  // Regrowth R8
-                9858: true,  // Regrowth R9
-                26980: true, // Regrowth R10
-                48442: true, // Regrowth R11
-                48443: true, // Regrowth R12
-                774: true,   // Rejuv R1  
-                1058: true,  // Rejuv R2   
-                1430: true,  // Rejuv R3   
-                2090: true,  // Rejuv R4   
-                2091: true,  // Rejuv R5   
-                3627: true,  // Rejuv R6   
-                8910: true,  // Rejuv R7   
-                9839: true,  // Rejuv R8   
-                9840: true,  // Rejuv R9   
-                9841: true,  // Rejuv R10   
-                25299: true, // Rejuv R11    
-                26981: true, // Rejuv R12    
-                26982: true, // Rejuv R13    
-                48440: true, // Rejuv R14       
-                48441: true, // Rejuv R15
-                5185: true,  // Healing Touch R1             
-                5186: true,  // Healing Touch R2            
-                5187: true,  // Healing Touch R3            
-                5188: true,  // Healing Touch R4            
-                5189: true,  // Healing Touch R5            
-                6778: true,  // Healing Touch R6            
-                8903: true,  // Healing Touch R7            
-                9758: true,  // Healing Touch R8            
-                9888: true,  // Healing Touch R9            
-                9889: true,  // Healing Touch R10            
-                25297: true, // Healing Touch R11            
-                26978: true, // Healing Touch R12            
-                26979: true, // Healing Touch R13            
-                48377: true, // Healing Touch R14            
-                48378: true, // Healing Touch R15            
-                740: true,   // Tranquility R1              
-                8918: true,  // Tranquility R2                 
-                9862: true,  // Tranquility R3                 
-                9863: true,  // Tranquility R4                 
-                26983: true, // Tranquility R5                 
-                48446: true, // Tranquility R6                 
-                48447: true, // Tranquility R7                 
-                48447: true, // Tranquility R7                 
-                2893: true,  // Abolish Poison
-                5420: true,  // Tree of Life
-                29166: true, // Innervate
-                33763: true, // Lifebloom R1 (periodic)
-                48450: true, // Lifebloom R2 (periodic)
-                48451: true, // Lifebloom R3 (periodic)
-                48438: true, // Wildgrowth R1
-                53248: true, // Wildgrowth R2
-                53249: true, // Wildgrowth R3
-                53251: true, // Wildgrowth R4
-                48470: true, // Gift of the Wild R4
+            maxRank: 5,
+            coeff: (_, rank = 5, spellId) => getThreatCoefficient(1 - 0.04 * rank * (spellId in {
+                8936: true,
+                8938: true,
+                8940: true,
+                8941: true,
+                9750: true,
+                9856: true,
+                9857: true,
+                9858: true,
+                26980: true,
+                774: true,
+                1058: true,
+                1430: true,
+                2090: true,
+                2091: true,
+                3627: true,
+                8910: true,
+                9839: true,
+                9840: true,
+                9841: true,
+                25299: true,
+                26981: true,
+                26982: true,
+                26982: true,
+                5185: true,
+                5186: true,
+                5187: true,
+                5188: true,
+                5189: true,
+                6778: true,
+                8903: true,
+                9758: true,
+                9888: true,
+                9889: true,
+                25297: true,
+                26978: true,
+                26979: true,
+                740: true,
+                8918: true,
+                9862: true,
+                9863: true,
+                26983: true,
             })),
         }
     },
@@ -171,7 +159,7 @@ const talents = {
         },
         "Burning Soul": {
             maxRank: 2,
-            coeff: (_, rank = 2) => getThreatCoefficient({4: 1 - 0.05 * rank}),
+            coeff: (_, rank = 2) => getThreatCoefficient({4: 1 - 0.1 * rank}),
         },
         "Frost Channeling": {
             maxRank: 3,
@@ -179,20 +167,12 @@ const talents = {
         }
     },
     Paladin: {
-        "Improved Righteous Fury": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(25780 in buffs)) return getThreatCoefficient(1);
-                let amp = 1 + Math.floor(rank * 50 / 3) / 100;
-                return getThreatCoefficient({2: (1 + 0.6 * amp) / 1.6});
-            }
-        },
         "Fanaticism": {
             maxRank: 3,
             coeff: function (buffs, rank = 0) {
-                // Ignore fanatacism when righteous fury is up
+                // Not modifying when righteous fury is up
                 if ((25780 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient(1.0 - (0.10 * rank));
+                return getThreatCoefficient(1 - (0.1 * rank));
             }
         }
     },
@@ -200,7 +180,7 @@ const talents = {
     Priest: {
         "Silent Resolve": {
             maxRank: 3,
-            coeff: (_, rank = 3) => getThreatCoefficient(1 - Math.floor(0.20/3) * rank),
+            coeff: (_, rank = 5) => getThreatCoefficient(1 - 0.20/3 * rank),
         },
         "Shadow Affinity": {
             maxRank: 3,
@@ -216,9 +196,7 @@ const talents = {
                 8010: true,
                 10466: true,
                 10467: true,
-                10468: true,
-                49275: true,
-                49276: true, // Lesser Healing Wave
+                10468: true, // Lesser Healing Wave
                 331: true,
                 332: true,
                 547: true,
@@ -228,20 +206,10 @@ const talents = {
                 8005: true,
                 10395: true,
                 10396: true,
-                25357: true, 
-                49272: true,
-                49273: true, // Healing Wave
+                25357: true, // Healing Wave
                 1064: true,
                 10622: true,
-                10623: true,
-                10623: true,
-                10623: true,
-                55458: true,
-                55459: true, // Chain Heal
-                61295: true,
-                61299: true,
-                61300: true,
-                61301: true, // Riptide
+                10623: true, // Chain Heal
             })),
         },
         "Spirit Weapons": {
@@ -273,6 +241,16 @@ const talents = {
             maxRank: 2,
             coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
+        "Improved Drain Soul": {
+            maxRank: 2,
+            coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
+        }
+    }
+    Death Knight: {
+        "Subversion": {
+            maxRank: 3,
+            coeff: (_, rank = 3) => getThreatCoefficient(1 - 0.25/3 * rank),
+        }
     }
 }
 
@@ -286,11 +264,10 @@ const invulnerabilityBuffs = {
     5599: "Hand of Protection",
     10278: "Hand of Protection",
     11958: "Ice Block",
-    3169: "LIP", // Limited Invulnerability Potion
     19752: "Divine Intervention",
     6724: "Light of Elune",
 }
-// These make threat suspends yellow-bordered
+// These make dots yellow-bordered
 const aggroLossBuffs = {
     118: true, 12824: true, 12825: true, 28272: true, 28271: true, 12826: true, // Mages' Polymorph
     23023: true, // Razorgore Conflagrate
@@ -300,8 +277,9 @@ const aggroLossBuffs = {
     24327: true, // Hakkar's Cause Insanity
     23603: true, // Nefarian: Wild Polymorph
     26580: true, // Princess Yauj: Fear
+    28410: true, // Kelthuzad: Chains of Kelthuzad
 }
-// These make fixates orange
+// These make dots orange
 const fixateBuffs = {
     355: true, // Taunt
     1161: true, // Challenging Shout
@@ -310,12 +288,18 @@ const fixateBuffs = {
     40604: true, // Gurtogg Fel Rage
     694: true, 7400: true, 7402: true, 20559: true, 20560: true, // Mocking Blow
     29060: true, // Deathknight Understudy Taunt
+    20736: true, // Distracting Shot
+    56222: true, // Dark Command
+    49576 true, // Death Grip
+    62124 true, // Hand of Reckoning
+
 }
 // These make a dot in the graph on application and removal
 // Also used for event filtering in fetchWCLreport
 const notableBuffs = {
     23397: true, // Nefarian's warrior class call
     23398: true, // Druid class call
+    29232: true, // Loatheb's fungal creep
 };
 for (let k in buffMultipliers) notableBuffs[k] = true;
 for (let k in invulnerabilityBuffs) notableBuffs[k] = true;
@@ -1057,10 +1041,10 @@ const spellFunctions = {
     //37676: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Leotheras demon form
     37098: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Nightbane's Rain of Bones. delay : 43 sec is the timer according to DBM
     29060: handler_taunt, // Deathknight Understudy Taunt
-    28835: handler_bossPartialThreatWipeOnCast(.5), // Mark of Zeliek
-    28834: handler_bossPartialThreatWipeOnCast(.5), // Mark of Mograine
-    28833: handler_bossPartialThreatWipeOnCast(.5), // Mark of Blaumeux
-    28832: handler_bossPartialThreatWipeOnCast(.5), // Mark of Korth'azz
+    //28835: handler_bossPartialThreatWipeOnCast(.5), // Mark of Zeliek - no threat drop in WOTLK
+    //28834: handler_bossPartialThreatWipeOnCast(.5), // Mark of Mograine - no threat drop in WOTLK
+    //28833: handler_bossPartialThreatWipeOnCast(.5), // Mark of Blaumeux - no threat drop in WOTLK
+    //28832: handler_bossPartialThreatWipeOnCast(.5), // Mark of Korth'azz - no threat drop in WOTLK
 
     /*  SSC */
     25035: handler_hydrossThreatWipeOnCast, // Hydross invoc spawns
@@ -1078,13 +1062,15 @@ const spellFunctions = {
     39873: handler_illidanEndP2ThreatWipeOnCast, // Illidan Glaive return (End of P2)
     // 40683: handler_bossThreatWipeOnCast, // Illidan enrage
     40647: handler_bossThreatWipeOnCast, // Illidan Shadow prison
+    29208: handler_bossThreatWipeOnCast, // Noth blink (first spell id)
+    29210: handler_bossThreatWipeOnCast, // Noth blink (second spell id)
 
 
     // testing if it works like Patchwerk ? Only on off tank?
     33813: handler_hatefulstrike(1500, 0), // Gruul's hurtfulstrike
-    28308: handler_hatefulstrike(1000, 2000), // Patchwerk's hateful strike
+    59192: handler_hatefulstrike(1000, 2000), // Patchwerk's hateful strike. TODO: Check WOTLK threat value
 
-    17624: handler_vanish, // Flask of Petrification
+    //17624: handler_vanish, // Flask of Petrification
 
     // Trinkets
     35163: handler_zero, // Blessing of the Silver Crescent
@@ -1103,201 +1089,104 @@ const spellFunctions = {
     28093: handler_zero, // Lightning speed - mongoose weapon
 
 // Paladin
-    25898: handler_threatOnBuff(60), // GBoK
-    25890: handler_threatOnBuff(60), // GBoL
-    27145: handler_threatOnBuff(69), // GBoL r2
-    27144: handler_threatOnBuff(69), // BoL r4
-    25916: handler_threatOnBuff(60), // GBoM
-    25782: handler_threatOnBuff(60), // GBoM
-    27141: handler_threatOnBuff(70), // GBoM r 3
-    27140: handler_threatOnBuff(70), // BoM r 8
-    25895: handler_threatOnBuff(60), // GBoS
-    25899: handler_threatOnBuff(60), // GBoSanc
-    27169: handler_threatOnBuff(70), // GBoSanc r 2
-    25894: handler_threatOnBuff(54), // GBoW
-    25918: handler_threatOnBuff(60), // GBoW
-    27143: handler_threatOnBuff(70), // GBoW r3
-    19742: handler_threatOnBuff(14), // BoW
-    19850: handler_threatOnBuff(24), // BoW
-    19852: handler_threatOnBuff(34), // BoW
-    19853: handler_threatOnBuff(44), // BoW
-    19854: handler_threatOnBuff(54), // BoW
-    25290: handler_threatOnBuff(60), // BoW
-    27142: handler_threatOnBuff(70), // BoW r 7
-    20293: threatFunctions.concat(handler_threatOnBuff(58), handler_damage), // Seal of Righteousness r8
-    27155: threatFunctions.concat(handler_threatOnBuff(58), handler_damage), // Seal of Righteousness r9
+    20217: handler_threatOnBuff(20), // BoK
+    43223: handler_threatOnBuff(60), // GBoK
+    48932: handler_threatOnBuff(79), // BOM
+    48934: handler_threatOnBuff(79), // GBoM
+    6940: handler_threatOnBuff(60), // Hand of Sac //TODO: Check threat value
+    20911: handler_threatOnBuff(60), // BoSanc //TODO: Check threat value
+    25899: handler_threatOnBuff(60), // GBoSanc //TODO: Check threat value
+    48936: handler_threatOnBuff(54), // BoW
+    48938: handler_threatOnBuff(54), // GBoW
+    53601: handler_threatOnBuff(28), // Sacred Shield
+    21084: threatFunctions.concat(handler_threatOnBuff(0), handler_damage), // Seal of Righteousness
+    20424: threatFunctions.concat(handler_threatOnBuff(14), handler_damage), // Seal of Command
     20286: handler_damage, // Judgement of Righteousness
-    26573: handler_damage, // Consecration r1
-    20116: handler_damage, // Consecration r2
-    20922: handler_damage, // Consecration r3
-    20923: handler_damage, // Consecration r4
-    20924: handler_damage, // Consecration r5
-    24239: handler_damage, // Hammer of Wrath
-
-    20925: handler_modDamage(1.35), // Holy Shield r1
-    20927: handler_modDamage(1.35), // Holy Shield r2
-    20928: handler_modDamage(1.35), // Holy Shield r3
-    27179: handler_modDamage(1.35), // Holy Shield r4
-
-    31935: handler_modDamage(1.3), // Avenger shield r1
-    32699: handler_modDamage(1.3), // Avenger shield r2
-    32700: handler_modDamage(1.3), // Avenger shield r3
+    20467: handler_damage, // Judgement of Command
+    48819: handler_damage, // Consecration
+    48806: handler_damage, // Hammer of Wrath
+    48801: handler_damage, // Exorcism
+    61411: handler_damage, // Shield of Righteousness
+    53595: handler_damage, // Hammer of the Righteous
+    48952: handler_damage, // Holy Shield
+    20424: handler_damage, // Seal of Command
+    48952: handler_modDamage(1.00), // Holy Shield
+    48827: handler_modDamage(1.00), // Avenger's Shield
+    1038: handler_partialThreatWipeOnEvent(0.02), // hand of salv; 2% per threat for 10s untalented
 
     31789: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Righteous Defense
+    67845: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Hand of Reckoning
+    68475: handler_modDamage(1.00), // Hand of Reckoning
+    53409: handler_zero, // Mana from Judgement of Wisdom
 
-    20268: handler_zero, // Mana from judgement of wisdom r1
-    20352: handler_zero, // Mana from judgement of wisdom r2
-    20353: handler_zero, // Mana from judgement of wisdom r3
-    27165: handler_zero, // Mana from judgement of wisdom r4
-
-    465: handler_zero, // Devotion Aura r1
-    10290: handler_zero, // Devotion Aura r2
-    643: handler_zero, // Devotion Aura r3
-    10291: handler_zero, // Devotion Aura r4
-    1032: handler_zero, // Devotion Aura r5
-    10292: handler_zero, // Devotion Aura r6
-    10293: handler_zero, // Devotion Aura r7
+    48942: handler_zero, // Devotion Aura
     19746: handler_zero, // Concentration Aura
-    19891: handler_zero, // Fire Resistance Aura r1
-    19899: handler_zero, // Fire Resistance Aura r2
-    19900: handler_zero, // Fire Resistance Aura r3
-    19888: handler_zero, // Frost Resistance Aura r1
-    19897: handler_zero, // Frost Resistance Aura r2
-    19898: handler_zero, // Frost Resistance Aura r3
-    19876: handler_zero, // Shadow Resistance Aura r1
-    19895: handler_zero, // Shadow Resistance Aura r2
-    19896: handler_zero, // Shadow Resistance Aura r3
-    7294: handler_damage, // Retribution Aura r1
-    10298: handler_damage, // Retribution Aura r2
-    10299: handler_damage, // Retribution Aura r3
-    10300: handler_damage, // Retribution Aura r4
-    10301: handler_damage, // Retribution Aura r5
-    20218: handler_zero, // Sanctity Aura
-// Paladin heals have .25 coefficient. Sources:
-// cha#0438 2018-12-04 https://discordapp.com/channels/383596811517952002/456930992557654037/519502645858271243
-//     [15:17] chaboi: but there is a grain of truth in that shitpost since paladin healing threat did get specifically nerfed by blizzard early on so they wouldnt be able to tank dungeons via just healing themselves
-//     [15:18] chaboi: which is why paladin healing threat is 0.5, which is much lower than the other healers even if they talent into threat reduc
-// 4man Onyxia https://classic.warcraftlogs.com/reports/TFqN9Z1HCxnLPypG
-//     Paladin doesn't pull threat when he should at usual .5 heal coefficient.
-    635: handler_modHeal(.5), // Holy Light r1
-    639: handler_modHeal(.5), // Holy Light r2
-    647: handler_modHeal(.5), // Holy Light r3
-    1026: handler_modHeal(.5), // Holy Light r4
-    1042: handler_modHeal(.5), // Holy Light r5
-    3472: handler_modHeal(.5), // Holy Light r6
-    10328: handler_modHeal(.5), // Holy Light r7
-    10329: handler_modHeal(.5), // Holy Light r8
-    25292: handler_modHeal(.5), // Holy Light r9
-    27135: handler_modHeal(.5), // Holy Light r10
-    27136: handler_modHeal(.5), // Holy Light r11
-    19750: handler_modHeal(.5), // Flash of Light r1
-    19939: handler_modHeal(.5), // Flash of Light r2
-    19940: handler_modHeal(.5), // Flash of Light r3
-    19941: handler_modHeal(.5), // Flash of Light r4
-    19942: handler_modHeal(.5), // Flash of Light r5
-    19943: handler_modHeal(.5), // Flash of Light r6
-    27137: handler_modHeal(.5), // Flash of Light r7
-    //633: handler_modHeal(.5), // Lay on Hands r1 - Generates a total threat of heal * .5 instead of heal * .25
-    //2800: handler_modHeal(.5), // Lay on Hands r2
-    //10310: handler_modHeal(.5), // Lay on Hands r3
-    //27154: handler_modHeal(.5), // Lay on Hands r4
-    25914: handler_modHeal(.5), // Holy Shock r1
-    25913: handler_modHeal(.5), // Holy Shock r2
-    25903: handler_modHeal(.5), // Holy Shock r3
+    48947: handler_zero, // Fire Resistance Aura
+    48945: handler_zero, // Frost Resistance Aura
+    48943: handler_zero, // Shadow Resistance Aura
+    54043: handler_zero, // Retribution Aura
+    31821: handler_zero, // Aura Mastery
+
+    48782: handler_modHeal(.5), // Holy Light
+    48785: handler_modHeal(.5), // Flash of Light
+    53652: handler_modHeal(.5), // Beacon of Light
+    48788: handler_modHeal(.5), // Lay on Hands
+    54968: handler_modHeal(.5), // Glyph of Holy Light
+    48821: handler_modHeal(.5), // Holy Shock
+    66922: handler_modHeal(.5), // Flash of Light HoT
     19968: handler_modHeal(.5), // Holy Light that appears in logs
     19993: handler_modHeal(.5), // Flash of Light that appears in logs
 
 // Mage
     10181: handler_damage, // Frostbolt
-    66: handler_partialThreatWipeOnEvent(.2), // invisibility : 20% per second of buff
+    66: handler_partialThreatWipeOnEvent(.333), // invisibility : 20% per second of buff
+    // TODO: mirror image threat suspension
 
 // Rogue
     1856: handler_vanish,
     1857: handler_vanish, // Vanish
     26889: handler_vanish, // Vanish
-    1966: handler_castCanMissNoCoefficient(-150), // Feint r1
-    6768: handler_castCanMissNoCoefficient(-240), // Feint r2
-    8637: handler_castCanMissNoCoefficient(-390), // Feint r3
-    11303: handler_castCanMissNoCoefficient(-600), // Feint r4
-    25302: handler_castCanMissNoCoefficient(-800), // Feint r5
+    25302: handler_castCanMissNoCoefficient(-1535), // Feint; Wowhead value is 2162, supposedly still modded by 0.71
 
 // Priest
     6788: handler_zero, // Weakened Soul
 
-    // mind blast no longer increase threat in tbc
-    // https://wowwiki-archive.fandom.com/wiki/Mind_Blast
-    8092: handler_damage, // Mind Blast r1
-    8102: handler_damage, // Mind Blast r2
-    8103: handler_damage, // Mind Blast r3
-    8104: handler_damage, // Mind Blast r4
-    8105: handler_damage, // Mind Blast r5
-    8106: handler_damage, // Mind Blast r6
-    10945: handler_damage, // Mind Blast r7
-    10946: handler_damage, // Mind Blast r8
-    10947: handler_damage, // Mind Blast r9
-    25372: handler_damage, // Mind Blast r10
-    25375: handler_damage, // Mind Blast r11
+    48127: handler_damage, // Mind Blast
 
-    15237: handler_zero, // Holy Nova r1
-    15430: handler_zero, // Holy Nova r2
-    15431: handler_zero, // Holy Nova r3
-    27799: handler_zero, // Holy Nova r4
-    27800: handler_zero, // Holy Nova r5
-    27801: handler_zero, // Holy Nova r6
-    23455: handler_zero, // Holy Nova r1
-    23458: handler_zero, // Holy Nova r2
-    23459: handler_zero, // Holy Nova r3
-    27803: handler_zero, // Holy Nova r4
-    27804: handler_zero, // Holy Nova r5
-    27805: handler_zero, // Holy Nova r6
+    48076: handler_zero, // Holy Nova heal
+    48078: handler_zero, // Holy Nova damage
+    // TODO: fade suspension
 
 // Warlock
-    18288: handler_zero, // Amplify Curse
-    603: handler_threatOnDebuffOrDamage(120), // Curse of Doom
+    47867: handler_threatOnDebuffOrDamage(160), // Curse of Doom
     18223: handler_zero, // Curse of Exhaustion
-    704: handler_threatOnDebuff(2 * 14), // CoR r1
-    7658: handler_threatOnDebuff(2 * 28), // CoR r2
-    7659: handler_threatOnDebuff(2 * 42), // CoR r3
-    11717: handler_threatOnDebuff(2 * 56), // CoR r4
-    17862: handler_threatOnDebuff(2 * 44), // CoS r1
-    17937: handler_threatOnDebuff(2 * 56), // CoS r2
-    1714: handler_threatOnDebuff(2 * 26), // CoT r1
-    11719: handler_threatOnDebuff(2 * 50), // CoT r2
-    702: handler_threatOnDebuff(2 * 4), // CoW r1
-    1108: handler_threatOnDebuff(2 * 12), // CoW r2
-    6205: handler_threatOnDebuff(2 * 22), // CoW r3
-    7646: handler_threatOnDebuff(2 * 32), // CoW r4
-    11707: handler_threatOnDebuff(2 * 42), // CoW r5
-    11708: handler_threatOnDebuff(2 * 52), // CoW r6
-    1490: handler_threatOnDebuff(2 * 32), // CotE r1
-    11721: handler_threatOnDebuff(2 * 46), // CotE r2
-    11722: handler_threatOnDebuff(2 * 60), // CotE r3
+    50511: handler_threatOnDebuff(142), // Curse of Weakness
+    17937: handler_threatOnDebuff(112), // Curse of Elements
+    11719: handler_threatOnDebuff(100), // Curse of Tongues
     1454: handler_zero, // Life Tap r1
     1455: handler_zero, // Life Tap r2
     1456: handler_zero, // Life Tap r3
     11687: handler_zero, // Life Tap r4
     11688: handler_zero, // Life Tap r5
     11689: handler_zero, // Life Tap r6
+    27222: handler_zero, // Life Tap r7
+    57946: handler_zero, // Life Tap r8
     31818: handler_zero, // Life Tap script
-    5138: handler_zero, // Drain Mana r1
-    6226: handler_zero, // Drain Mana r2
-    11703: handler_zero, // Drain Mana r3
-    11704: handler_zero, // Drain Mana r4
+    5138: handler_zero, // Drain Mana
     689: handler_damage, // Drain Life r1
     699: handler_damage, // Drain Life r2
     709: handler_damage, // Drain Life r3
     7651: handler_damage, // Drain Life r4
     11699: handler_damage, // Drain Life r5
     11700: handler_damage, // Drain Life r6
-    18265: handler_threatOnDebuffOrDamage(2 * 30), // Siphon Life r1
-    18879: handler_threatOnDebuffOrDamage(2 * 38), // Siphon Life r2
-    18880: handler_threatOnDebuffOrDamage(2 * 48), // Siphon Life r3
-    18881: handler_threatOnDebuffOrDamage(2 * 58), // Siphon Life r4
-    710: handler_threatOnDebuff(2 * 28), // Banish r1
-    18647: handler_threatOnDebuff(2 * 48), // Banish r2
-    5782: handler_threatOnDebuff(2 * 8), // Fear r1
-    6213: handler_threatOnDebuff(2 * 32), // Fear r2
-    6215: handler_threatOnDebuff(2 * 56), // Fear r3
+    11700: handler_damage, // Drain Life r7
+    63106: handler_modHeal(.5) //Siphon Life
+    47856: handler_modHeal(.5) //Blood Funnel
+    47893: handler_modHeal(0.0) //Fel Armor
+    54181: handler_modHeal(0.0) //Fel Synergy
+    710: handler_threatOnDebuff(56), // Banish r1
+    18647: handler_threatOnDebuff(56), // Banish r2
+    6215: handler_threatOnDebuff(112), // Fear
     172: handler_damage, // Corruption r1
     6222: handler_damage, // Corruption r2
     6223: handler_damage, // Corruption r3
@@ -1305,27 +1194,28 @@ const spellFunctions = {
     11671: handler_damage, // Corruption r5
     11672: handler_damage, // Corruption r6
     25311: handler_damage, // Corruption r7
+    47812: handler_damage, // Corruption r8
+    47813: handler_damage, // Corruption r9
     980: handler_damage, // CoA r1
     1014: handler_damage, // CoA r2
     6217: handler_damage, // CoA r3
     11711: handler_damage, // CoA r4
     11712: handler_damage, // CoA r5
     11713: handler_damage, // CoA r6
-    6789: handler_damage, // Death Coil r1
-    17925: handler_damage, // Death Coil r2
-    17926: handler_damage, // Death Coil r3
+    27218: handler_damage, // CoA r7
+    47863: handler_damage, // CoA r8
+    47864: handler_damage, // CoA r9
+    47860: handler_damage, // Death Coil - healing does 0 threat
     1120: handler_damage, // Drain Soul r1
     8288: handler_damage, // Drain Soul r2
     8289: handler_damage, // Drain Soul r3
     11675: handler_damage, // Drain Soul r4
-    5484: handler_threatOnDebuff(2 * 40), // Howl of Terror r1
+    27217: handler_damage, // Drain Soul r5
+    47855: handler_damage, // Drain Soul r6
+    50577: handler_threatOnDebuff(2 * 40), // Howl of Terror r1
     17928: handler_threatOnDebuff(2 * 54), // Howl of Terror r2
-    5676: handler_modDamage(2), // Searing Pain r1
-    17919: handler_modDamage(2), // Searing Pain r2
-    17920: handler_modDamage(2), // Searing Pain r3
-    17921: handler_modDamage(2), // Searing Pain r4
-    17922: handler_modDamage(2), // Searing Pain r5
-    17923: handler_modDamage(2), // Searing Pain r6
+    47815: handler_modDamage(2), // Searing Pain r10
+
 
     //29858: handler_bossDropThreatOnCast(0.5),// Soulshatter
     29858: handler_partialThreatWipeOnCast(.5),// Soulshatter
@@ -1344,12 +1234,20 @@ const spellFunctions = {
     10413: handler_modDamage(1), // Earth Shock r6
     10414: handler_modDamage(1), // Earth Shock r7
     25454: handler_modDamage(1), // Earth Shock r8
+    49230: handler_modDamage(1), // Earth Shock r9
+    49231: handler_modDamage(1), // Earth Shock r10
+    193796: handler_modDamage(1), // Flametongue Attack
+    61654: handler_modDamage(1), // Fire Nova
+
 
     8056: handler_modDamage(2), // Frost Shock r1
     8058: handler_modDamage(2), // Frost Shock r2
     10472: handler_modDamage(2), // Frost Shock r3
     10473: handler_modDamage(2), // Frost Shock r4
     25464: handler_modDamage(2), // Frost Shock r5
+    49235: handler_modDamage(2), // Frost Shock r6
+    49236: handler_modDamage(2), // Frost Shock r7
+
 
     16246: handler_zero, // Clearcasting
     8516: handler_zero, // Windfury Attack (buff only) R1
@@ -1385,6 +1283,8 @@ const spellFunctions = {
     45294: handler_zero, // Rank 10
     45295: handler_zero, // Rank 11
     45296: handler_zero, // Rank 12
+    49237: handler_zero, // Rank 13
+    49238: handler_zero, // Rank 14
 
     // Chain lightnings
     45297: handler_zero, // Rank 1
@@ -1392,10 +1292,13 @@ const spellFunctions = {
     45299: handler_zero, // Rank 3
     45300: handler_zero, // Rank 4
     45301: handler_zero, // Rank 5
-    45302: handler_zero, // Rank 6*
+    45302: handler_zero, // Rank 6
+    49270: handler_zero, // Rank 7
+    49271: handler_zero, // Rank 8
+
 
     // Elemental mastery
-    16166: handler_zero, // Rank 6
+    64701: handler_zero, // EM
 
 // From ResultsMayVary https://resultsmayvary.github.io/ClassicThreatPerSecond/
     1: handler_damage,
@@ -1431,9 +1334,9 @@ const spellFunctions = {
     // TODO : Need to double check if slow/stun effects add threat modifier on some explosives
 
     /* Zero Threat Abilities */
-    71: handler_zero,        // Defensive Stance
-    2457: handler_zero,        // Battle Stance
-    2458: handler_zero,        // Berserker Stance
+    71: handler_zero,		// Defensive Stance
+    2457: handler_zero,		// Battle Stance
+    2458: handler_zero,		// Berserker Stance
     20572: handler_zero, //("Blood Fury"), //Blood Fury
     26296: handler_zero, //("Berserking (Troll racial)"), //Berserking (Troll racial)
     26635: handler_zero, //("Berserking (Troll racial)"), //Berserking (Troll racial)
@@ -1700,6 +1603,40 @@ const spellFunctions = {
     9892: handler_castCanMiss(-600, "Cower"),
     31709: handler_castCanMiss(-800, "Cower"),
     27004: handler_castCanMiss(-1170, "Cower"),
+
+    // Death Knight
+    49909: handler_modDamage(7),    // IT is 7x threat in Frost, 1x in Blood/Unholy (before stance multipliers)
+    52212: handler_modDamage(1.9),  // Death and Decay
+    66217: handler_modDamage(1.75),  // Rune Strike
+
+    49895: handler_modDamagePlusThreat(1.0, 100), // Death Coil
+    49924: handler_modDamagePlusThreat(1.0, 164), // Death Strike; heal has 164 base threat component
+    55271: handler_modDamagePlusThreat(1.0, 120), // Scourge Strike
+
+    45524: handler_threatOnDebuffOrDamage(116), // Chains of Ice
+    49203: handler_threatOnDebuffOrDamage(110), // Hungering Cold
+    49916: handler_threatOnDebuffOrDamage(138), // Strangulate
+    49016: handler_threatOnDebuffOrDamage(55), // Unholy Frenzy
+
+    49182: handler_threatOnBuff(20), // Blade Barrier 1/5
+    49500: handler_threatOnBuff(20), // Blade Barrier 2/5
+    49501: handler_threatOnBuff(20), // Blade Barrier 3/5
+    55255: handler_threatOnBuff(20), // Blade Barrier 4/5
+    55226: handler_threatOnBuff(20), // Blade Barrier 5/5
+    57330: handler_threatOnBuff(75), // HoW R1
+    57263: handler_threatOnBuff(75), // HoW R2
+    49796: handler_threatOnBuff(55), // Deathchill
+    49206: handler_threatOnBuff(220), // Summon Gargoyle
+    46584: handler_threatOnBuff(1), // Raise Dead
+
+    49576: threatFunctions.concat(handler_damage, handler_markSourceOnMiss(borders.taunt)), // Death Grip
+    49576: handler_threatOnDebuffOrDamage(110), // Grip generates 110 threat pre-stance mod after taunt effect
+
+    45470: handler_modHeal(.55), // Death Strike
+    48982: handler_modHeal(.55), // Rune Tap // TODO: also generates 55 base threat
+
+    // TODO: deal with 1x multiplier in unholy/blood for IT
+    // TODO: deal with dancing rune weapon threat transfer (maybe)
 
     /* Healing */
     // As of mars 30 2022, blizzard apparently changed final tick of life bloom's behaviour

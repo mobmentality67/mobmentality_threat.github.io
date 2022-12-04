@@ -245,7 +245,7 @@ const talents = {
             maxRank: 2,
             coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
-    }
+    },
     Death Knight: {
         "Subversion": {
             maxRank: 3,

@@ -324,7 +324,6 @@ class ThreatTrace {
 
 class Unit {
     constructor(key, name, type, events, lastInvisibility = 0) { // Info is an object from WCL API
-        this.mdStacksPerBand = [];
         this.lastInvisibility = lastInvisibility;
         this.insignificance = false;
         this.lastTarget = {};
@@ -407,11 +406,6 @@ class Unit {
                 // Adding a delay for projectile traveling time...
                 // 3 seconds
                 if (ev.timestamp >= band.startTime && band.endTime + (3 * 1000) >= ev.timestamp) {
-                    if (!this.mdStacksPerBand[band.startTime]) {
-                        this.mdStacksPerBand[band.startTime] = 3;
-                    } else if (this.mdStacksPerBand[band.startTime] !== 1) {
-                        this.mdStacksPerBand[band.startTime] = this.mdStacksPerBand[band.startTime] - 1;
-                    } else continue;
                     let b = fight.eventToUnit(ev, "target");
                     if (b) {
                         if (band.target != null) { // If this is an unknown target from pre-cast, don't add the threat to anyone
@@ -426,7 +420,6 @@ class Unit {
                 }
             }
         }
-
         return false;
     }
 

@@ -843,31 +843,45 @@ class Fight {
         this.tranquilAir = false;
     }
 
+    setupMDBands(unitId, misdirectionCasts) {
+        let mdCastIndex = 0;
+        let mdBandsContainer = globalMdAuras[unitId][0];
+        for (let bandIndex in mdBandsContainer.bands) { // Iterate over bands to find a target
+            let currentBand = mdBandsContainer.bands[bandIndex]; 
+            if ((misdirectionCasts.length < mdBandsContainer.bands.length) &&
+                (bandIndex == 0)) { // If there are less casts than MD auras, skip the first one -- unknown target from pre-cast
+                    console.log("Found pre-cast MD from " + mdBandsContainer.name + " ending at " 
+                      + currentBand.endTime + ", can't assign target -> ignoring threat");
+                    currentBand.target = null;
+                    continue;
+            }
+            currentBand.target = misdirectionCasts[mdCastIndex]; // Otherwise, assign MD targets in order of time cast
+            mdCastIndex++;
+        }
+    }
+
     async fetch() {
         combatantInfo = await fetchWCLCombatantInfo(this.reportId + "?", this.start, this.end);
 
         if ("events" in this) return;
         this.events = await fetchWCLreport(this.reportId + "?", this.start, this.end);
-        for (let f in this.globalUnits) {
-            if (this.globalUnits[f].type === "Hunter") { // TODO: Add tricks
-                let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, this.globalUnits[f].id);
-                misdirectionUptime.source = this.globalUnits[f].id;
-                globalMdAuras[this.globalUnits[f].id] = misdirectionUptime;
-                let misdirectionCasts = await fetchWCLMisdirectionCasts(this.reportId + "?", this.start, this.end, this.globalUnits[f].id);
-                let mdCastIndex = 0;
-                for (let bandIndex in globalMdAuras[this.globalUnits[f].id][0].bands) { // ITerate over bands to find a target
-                    let currentBand = globalMdAuras[this.globalUnits[f].id][0].bands[bandIndex]; 
-                    if ((misdirectionCasts.length < globalMdAuras[this.globalUnits[f].id][0].bands.length) &&
-                        (bandIndex == 0)) { // If there are less casts than MD auras, skip the first one -- unknown target from pre-cast
-                            console.log("Found pre-cast MD from " + globalMdAuras[this.globalUnits[f].id][0].name + " ending at " 
-                              + currentBand.endTime + ", can't assign target -> ignoring threat");
-                            currentBand.target = null;
-                            continue;
-                    }
-                    currentBand.target = misdirectionCasts[mdCastIndex]; // Otherwise, assign MD targets in order of time cast
-                    mdCastIndex++;
-                }
+        for (let sourceID in this.globalUnits) {
+            let sourceUnit = this.globalUnits[sourceID];
+            if (sourceUnit.type === "Hunter") { // TODO: Add tricks
+                let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, sourceUnit.id);
+                misdirectionUptime.source = sourceUnit.id;
+                globalMdAuras[sourceUnit.id] = misdirectionUptime;
+                let misdirectionCasts = await fetchWCLMisdirectionCasts(this.reportId + "?", this.start, this.end, sourceUnit.id);
+                this.setupMDBands(sourceID, misdirectionCasts);
             }
+            else if (this.globalUnits[sourceID].type == "Roguexx") {
+                let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, sourceUnit.id);
+                misdirectionUptime.source = sourceUnit.id;
+                globalMdAuras[sourceUnit.id] = misdirectionUptime;
+                let misdirectionCasts = await fetchWCLMisdirectionCasts(this.reportId + "?", this.start, this.end, sourceUnit.id);
+                this.setupMDBands(sourceID, misdirectionCasts);
+            }
+
         }
         
     }

@@ -10,6 +10,7 @@ let colorByClass = true;
 
 let combatantInfo = [];
 const globalMdAuras = [];
+const globalMdTargets = [];
 let nightBaneNextLanding;
 let t6DruidSet = [31042, 31034, 31039, 31044, 31048, 34556, 34444, 34573];
 let splitHealingThreatOption = true;
@@ -132,6 +133,13 @@ async function fetchWCLMisdirectionUptime(path, start, end, source) {
     if (!json) throw "Could not parse report " + path;
     json.auras.source = source;
     return json.auras;
+}
+
+async function fetchWCLMisdirectionCasts(path, start, end, source) {
+    let query = `report/tables/casts/${path}&start=${start}&end=${end}&abilityid=34477&sourceid=${source}`;
+    let json = await fetchWCLv1(query);
+    if (!json) throw "Could not parse report " + path;
+    return json.entries;
 }
 
 class ThreatTrace {
@@ -391,15 +399,11 @@ class Unit {
     }
 
     handleMisdirectionDamage(amount, ev, fight) { // TODO: Fix MD for Wrath, add tricks
-        if (ev.ability.guid === 27016) return false;
-        // filter serpent sting
-
         let mdAuraForThis = globalMdAuras[this.key];
         for (let i in mdAuraForThis) {
             let md = mdAuraForThis[i];
             for (let j in md.bands) {
                 let band = md.bands[j];
-
                 // Adding a delay for projectile traveling time...
                 // 3 seconds
                 if (ev.timestamp >= band.startTime && band.endTime + (3 * 1000) >= ev.timestamp) {
@@ -410,8 +414,13 @@ class Unit {
                     } else continue;
                     let b = fight.eventToUnit(ev, "target");
                     if (b) {
-                        console.log("[" + ev.timestamp + "]MD: Redirecting " + amount + " from " + this.name + " to " + md.name);
-                        b.addThreat(md.id, amount, ev.timestamp, "Misdirect (" + ev.ability.name + ")", this.threatCoeff(ev.ability));
+                        if (band.target != null) { // If this is an unknown target from pre-cast, don't add the threat to anyone
+                            console.log("[" + ev.timestamp + "] MD: Redirecting " + amount + " from " + this.name + " to " + band.target.name);
+                            b.addThreat(band.target.id, amount, ev.timestamp, "Misdirect (" + ev.ability.name + ")", this.threatCoeff(ev.ability));
+                        }
+                        else {
+                            console.log("[" + ev.timestamp + "] MD: Ignoring " + amount + " from " + this.name + " -> Unknown Target (pre-cast?)");;
+                        }
                         return true;
                     }
                 }
@@ -851,8 +860,23 @@ class Fight {
                 let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, this.globalUnits[f].id);
                 misdirectionUptime.source = this.globalUnits[f].id;
                 globalMdAuras[this.globalUnits[f].id] = misdirectionUptime;
+                let misdirectionCasts = await fetchWCLMisdirectionCasts(this.reportId + "?", this.start, this.end, this.globalUnits[f].id);
+                let mdCastIndex = 0;
+                for (let bandIndex in globalMdAuras[this.globalUnits[f].id][0].bands) { // ITerate over bands to find a target
+                    let currentBand = globalMdAuras[this.globalUnits[f].id][0].bands[bandIndex]; 
+                    if ((misdirectionCasts.length < globalMdAuras[this.globalUnits[f].id][0].bands.length) &&
+                        (bandIndex == 0)) { // If there are less casts than MD auras, skip the first one -- unknown target from pre-cast
+                            console.log("Found pre-cast MD from " + globalMdAuras[this.globalUnits[f].id][0].name + " ending at " 
+                              + currentBand.endTime + ", can't assign target -> ignoring threat");
+                            currentBand.target = null;
+                            continue;
+                    }
+                    currentBand.target = misdirectionCasts[mdCastIndex]; // Otherwise, assign MD targets in order of time cast
+                    mdCastIndex++;
+                }
             }
         }
+        
     }
 
     eventToUnit(ev, unit) { // Unit should be "source" or "target"

@@ -60,7 +60,7 @@ const buffMultipliers = {
     5487: getThreatCoefficient(1.3),		// Bear Form
     9634: getThreatCoefficient(1.3),		// Dire Bear Form
     768: getThreatCoefficient(0.71),		// Cat Form
-    25780: getThreatCoefficient(1.8),	    // Righteous Fury
+    25780: getThreatCoefficient(1.43),	    // Righteous Fury
     26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
     2613: getThreatCoefficient(1.02),		// gloves enchants
     2621: getThreatCoefficient(0.98),		// subtlety enchants
@@ -266,6 +266,7 @@ const invulnerabilityBuffs = {
     11958: "Ice Block",
     19752: "Divine Intervention",
     6724: "Light of Elune",
+    586: "Fade",
 }
 // These make dots yellow-bordered
 const aggroLossBuffs = {
@@ -285,7 +286,6 @@ const fixateBuffs = {
     1161: true, // Challenging Shout
     5209: true, // Challenging Roar
     6795: true, // Growl
-    40604: true, // Gurtogg Fel Rage
     694: true, 7400: true, 7402: true, 20559: true, 20560: true, // Mocking Blow
     29060: true, // Deathknight Understudy Taunt
     20736: true, // Distracting Shot
@@ -324,7 +324,7 @@ const auraImplications = {
         6572: 71, 6574: 71, 7379: 71, 11600: 71, 11601: 71, 25288: 71, 25269: 71, 30357: 71, //Revenge
         2565: 71, //Shield Block
         871: 71, //Shield Wall
-        23922: 71, 23923: 71, 23924: 71, 23925: 71, 25258: 71, 30356: 71, // Shield slam
+        // 23922: 71, 23923: 71, 23924: 71, 23925: 71, 25258: 71, 30356: 71, // Shield slam
     },
     /*
     Druid: {
@@ -360,7 +360,17 @@ const threatFunctions = {
             return;
         }
         let coeff = (useThreatCoeffs ? a.threatCoeff(ev.ability) : 1) * extraCoeff;
-
+        let source = fight.units[ev.sourceID];
+        if ((source instanceof Player) && (source.type == "Paladin")) { // Workaround to fix RF paladins for holy spells
+            if (25780 in fight.units[ev.sourceID].buffs) {
+                if (ev.ability.type == 2) {
+                    coeff = 2.534;
+                }
+                else {
+                    coeff = 1.43;
+                }
+            }
+        }
         b.addThreat(a.key, amount, ev.timestamp, ev.ability.name, coeff);
     },
     unitThreatenEnemiesSplit(ev, unit, fight, amount, useThreatCoeffs = true) {
@@ -1110,8 +1120,8 @@ const spellFunctions = {
     53595: handler_damage, // Hammer of the Righteous
     48952: handler_damage, // Holy Shield
     20424: handler_damage, // Seal of Command
-    48952: handler_modDamage(1.00), // Holy Shield
-    48827: handler_modDamage(1.00), // Avenger's Shield
+    48952: handler_damage, // Holy Shield
+    48827: handler_damage, // Avenger's Shield
     1038: handler_partialThreatWipeOnEvent(0.02), // hand of salv; 2% per threat for 10s untalented
 
     31789: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Righteous Defense

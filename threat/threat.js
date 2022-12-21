@@ -377,7 +377,7 @@ class Unit {
                 }
             } else if (t === "death") {
                 if (Unit.eventToKey(events[i], "target") !== key) continue;
-                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguish
+                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguish TODO:: JF -> Is it? Check if can add from general events cast
                 this.dies = true;
             }
         }
@@ -390,7 +390,7 @@ class Unit {
         this.lastInvisibility = value;
     }
 
-    handleMisdirectionDamage(amount, ev, fight) {
+    handleMisdirectionDamage(amount, ev, fight) { // TODO: Fix MD for Wrath, add tricks
         if (ev.ability.guid === 27016) return false;
         // filter serpent sting
 
@@ -565,9 +565,6 @@ class Player extends Unit {
                         case "Druid" :
                             break;
                         case "Paladin" :
-                            if (talents[1].id < 13) {
-                                this.talents["Improved Righteous Fury"].rank = 0;
-                            }
                             if (talents[2].id < 40) {
                                 this.talents["Fanaticism"].rank = 0;
                             }
@@ -849,39 +846,8 @@ class Fight {
 
         if ("events" in this) return;
         this.events = await fetchWCLreport(this.reportId + "?", this.start, this.end);
-        // Custom events
-        if (this.encounter === 791) { // High Priestess Arlokk
-            let u;
-            for (let k in this.globalUnits) {
-                if (this.globalUnits[k].name === this.name) {
-                    u = this.globalUnits[k];
-                    break;
-                }
-            }
-            if (!u) return;
-            let lastTime = this.start;
-            for (let i = 0; i < this.events.length; ++i) {
-                if (this.events[i].type !== "cast" || this.events[i].sourceID !== u.id) continue;
-                if (this.events[i].timestamp - lastTime > 30000) {
-                    for (let j = i - 1; j >= 0; --j) {
-                        if (this.events[i].timestamp - this.events[j].timestamp < 5000) continue;
-                        this.events.splice(j + 1, 0, {
-                            ability: {guid: -1, name: "Estimated re-entry"},
-                            timestamp: this.events[j].timestamp,
-                            type: "cast",
-                            sourceID: u.id,
-                            targetID: -1
-                        });
-                        break;
-                    }
-                }
-                lastTime = this.events[i].timestamp;
-            }
-        }
-
         for (let f in this.globalUnits) {
-
-            if (this.globalUnits[f].type === "Hunter") {
+            if (this.globalUnits[f].type === "Hunter") { // TODO: Add tricks
                 let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, this.globalUnits[f].id);
                 misdirectionUptime.source = this.globalUnits[f].id;
                 globalMdAuras[this.globalUnits[f].id] = misdirectionUptime;
@@ -1093,7 +1059,7 @@ class Report {
         let allFriendlies = [...this.data.friendlies, ...this.data.friendlyPets];
         for (let f of allFriendlies) {
             // The settings for these buffs are displayed for all classes
-            f.initialBuffs = {1038: 0, 25895: 0, 25909: 0, 2613: 0, 2621: 0};
+            f.initialBuffs = {2613: 0, 2621: 0};
             // Copy talents from the global structure to this player
             f.talents = {};
             for (let talentName in talents[f.type]) {

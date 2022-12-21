@@ -240,13 +240,13 @@ const talents = {
         "Destructive Reach": {
             maxRank: 2,
             coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
-        }
+        },
         "Improved Drain Soul": {
             maxRank: 2,
             coeff: (_, rank = 2) => getThreatCoefficient(1 - 0.10 * rank),
         }
     },
-    Death Knight: {
+    DeathKnight: {
         "Subversion": {
             maxRank: 3,
             coeff: (_, rank = 3) => getThreatCoefficient(1 - 0.25/3 * rank),
@@ -290,8 +290,8 @@ const fixateBuffs = {
     29060: true, // Deathknight Understudy Taunt
     20736: true, // Distracting Shot
     56222: true, // Dark Command
-    49576 true, // Death Grip
-    62124 true, // Hand of Reckoning
+    49576: true, // Death Grip
+    62124: true, // Hand of Reckoning
 
 }
 // These make a dot in the graph on application and removal
@@ -1180,10 +1180,10 @@ const spellFunctions = {
     11699: handler_damage, // Drain Life r5
     11700: handler_damage, // Drain Life r6
     11700: handler_damage, // Drain Life r7
-    63106: handler_modHeal(.5) //Siphon Life
-    47856: handler_modHeal(.5) //Blood Funnel
-    47893: handler_modHeal(0.0) //Fel Armor
-    54181: handler_modHeal(0.0) //Fel Synergy
+    63106: handler_modHeal(.5), //Siphon Life
+    47856: handler_modHeal(.5), //Blood Funnel
+    47893: handler_modHeal(0.0), //Fel Armor
+    54181: handler_modHeal(0.0), //Fel Synergy
     710: handler_threatOnDebuff(56), // Banish r1
     18647: handler_threatOnDebuff(56), // Banish r2
     6215: handler_threatOnDebuff(112), // Fear

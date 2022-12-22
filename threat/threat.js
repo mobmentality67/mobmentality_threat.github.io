@@ -11,8 +11,6 @@ let colorByClass = true;
 let combatantInfo = [];
 const globalMdAuras = [];
 const globalMdTargets = [];
-let nightBaneNextLanding;
-let t6DruidSet = [31042, 31034, 31039, 31044, 31048, 34556, 34444, 34573];
 let splitHealingThreatOption = true;
 
 /*
@@ -348,7 +346,6 @@ class Unit {
         this.type = type;
         this.spellSchool = preferredSpellSchools[type] || 1;
         this.baseThreatCoeff = baseThreatCoefficients[type] || getThreatCoefficient(1);
-        this.nbDruidT6Part = 0;
         this.buffs = {};
         this.alive = true;
         this.dies = false;
@@ -573,14 +570,19 @@ class Player extends Unit {
                             if (talents[1].id < 35) {
                                 this.talents["Improved Berserker Stance"].rank = 0;
                             }
-                            if (talents[2].id < 3) {
+                            if (talents[0].id < 8) {
                                 this.talents["Tactical Mastery"].rank = 0;
                             }
                             if (talents[2].id < 10) {
                                 this.talents["Defiance"].rank = 0;
                             }
                             break;
-                        case "Druid" :
+                        case "Druid":
+                            if (talents[0].id < 15)
+                                this.talents["Nature's Reach"].rank = 0;
+                            if (talents[2].id < 20)
+                                this.talents["Subtlety"].rank = 0;
+                            
                             break;
                         case "Paladin" :
                             if (talents[2].id < 40) {
@@ -615,20 +617,12 @@ class Player extends Unit {
                 // console.log(JSON.stringify(gear));
                 if (gear) {
                     for (const g of gear) {
-
-
-                        if(t6DruidSet.includes(g.id)) {
-                            console.log("Druid T 6 part plus plus")
-                            // console.log(JSON.stringify(g))
-
-                            this.nbDruidT6Part++;
-                        }
                         let enchant = g.permanentEnchant;
                         if (enchant != null) {
                             if (enchant === 2613) { // gloves threat enchant
                                 this.buffs[2613] = true;
                             }
-                            if (enchant === 2621) { // cloack threat enchant
+                            if (enchant === 2621) { // cloak threat enchant
                                 this.buffs[2621] = true;
                             }
                         }
@@ -665,7 +659,7 @@ class Player extends Unit {
         for (let i = 0; i < events.length; ++i) {
             if (!("ability" in events[i])) continue;
             if (Unit.eventToKey(events[i], "source") !== this.key) continue;
-            if (![20925, 20927, 20928, 27179].includes(events[i].ability.guid)) continue;
+            if (![48952].includes(events[i].ability.guid)) continue; // Detect Holy Shield
             this.buffs[25780] = true;
             this.tank = true;
             return;
@@ -680,7 +674,7 @@ class Player extends Unit {
         for (let i = 0; i < events.length; ++i) {
             if (!("ability" in events[i])) continue;
             if (Unit.eventToKey(events[i], "source") !== this.key) continue;
-            if (![33878, 33986, 33987].includes(events[i].ability.guid)) continue;
+            if (![48564].includes(events[i].ability.guid)) continue; // Detect Mangle bear
             this.buffs[9634] = true;
             this.tank = true;
             return;
@@ -869,8 +863,6 @@ class Fight {
         this.tranquilAir = false;
     }
 
-
-
     insertBand(allTargetBands, targetBands, targetID, name) {
         for (let band in targetBands) {
             targetBands[band].name = name;
@@ -899,8 +891,7 @@ class Fight {
             let currentBand = mdSourceBands.bands[bandIndex]; 
             if ( (sourceClass == "Hunter") &&
                 (misdirectionCasts.length < mdSourceBands.bands.length) &&
-                (bandIndex == 0)) 
-                { // If there are less casts than MD auras, skip the first one -- unknown target from pre-cast
+                (bandIndex == 0)) { // If there are less casts than MD auras, skip the first one -- unknown target if pre-cast
                     console.log("Found pre-cast MD from " + mdSourceBands.name + " ending at " 
                       + currentBand.endTime + ", can't assign target -> ignoring threat");
                     currentBand.target = null;
@@ -1053,16 +1044,6 @@ class Fight {
                     if (!(i in notableBuffs)) break;
                     u = this.eventToUnit(ev, "target");
                     if (!u) break;
-                    if (i === 23397 && ev.type === "applydebuff") { // Special handler for Nefarian's warrior class call
-                        delete u.buffs[71];
-                        delete u.buffs[2457];
-                        u.buffs[2458] = true;
-                    }
-                    if (i === 23398 && ev.type === "applydebuff") { // Druid class call
-                        delete u.buffs[5487];
-                        delete u.buffs[9634];
-                        u.buffs[768] = true;
-                    }
                     u.buffs[i] = true;
                     [_, enemies] = this.eventToFriendliesAndEnemies(ev, "target");
                     for (let k in enemies) {
@@ -1096,9 +1077,6 @@ class Fight {
                     for (let k in enemies) {
                         enemies[k].addThreat(u.key, null, ev.timestamp, ev.ability.name + " fades", u.threatCoeff());
                     }
-                    if (i === 23398) { // Druid class call
-                        delete u.buffs[768];
-                    }
                     delete u.buffs[i];
                     if (i in fixateBuffs) {
                         let v = this.eventToUnit(ev, "source");
@@ -1107,20 +1085,6 @@ class Fight {
                         delete t.fixates[ev.ability.name];
                         t.addMark(ev.timestamp, ev.ability.name + " fades");
                     }
-            }
-        }
-
-        // hack for nightbane
-        if (nightBaneNextLanding) {
-            if (ev.sourceIsFriendly && !ev.targetIsFriendly) {
-                if (ev.timestamp > nightBaneNextLanding) {
-                    let u = this.eventToUnit(ev, "target");
-                    if (!u) return;
-                    for (let k in u.threat) {
-                        u.setThreat(k, 0, nightBaneNextLanding, "Landing Threat Wipe");
-                    }
-                    nightBaneNextLanding = null;
-                }
             }
         }
 

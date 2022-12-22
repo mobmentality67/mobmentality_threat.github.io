@@ -50,15 +50,14 @@ const buffNames = {
 }
 
 const buffMultipliers = {
-    40618: getThreatCoefficient(0),		    // Gurtogg Insignificance
     71: getThreatCoefficient(1.3),		    // Defensive Stance
     2457: getThreatCoefficient(0.8),		// Battle Stance
     2458: getThreatCoefficient(0.8),		// Berserker Stance
     48236: getThreatCoefficient(2.0735),	// Frost Presence
     48266: getThreatCoefficient(0.8),		// Blood Presence
     48265: getThreatCoefficient(0.8),		// Unholy Presence
-    5487: getThreatCoefficient(1.3),		// Bear Form
-    9634: getThreatCoefficient(1.3),		// Dire Bear Form
+    5487: getThreatCoefficient(2.07),		// Bear Form
+    9634: getThreatCoefficient(2.07),		// Dire Bear Form
     768: getThreatCoefficient(0.71),		// Cat Form
     25780: getThreatCoefficient(1.43),	    // Righteous Fury
     26400: getThreatCoefficient(0.3),		// Fetish of the Sand Reaver
@@ -98,57 +97,24 @@ const talents = {
         },
     },
     Druid: {
-        "Feral Instinct": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(5487 in buffs) && !(9634 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient((1.3 + 0.05 * rank) / 1.3);
-            }
-        },
         "Subtlety": {
             maxRank: 5,
             coeff: (_, rank = 5, spellId) => getThreatCoefficient(1 - 0.04 * rank * (spellId in {
-                8936: true,
-                8938: true,
-                8940: true,
-                8941: true,
-                9750: true,
-                9856: true,
-                9857: true,
-                9858: true,
-                26980: true,
-                774: true,
-                1058: true,
-                1430: true,
-                2090: true,
-                2091: true,
-                3627: true,
-                8910: true,
-                9839: true,
-                9840: true,
-                9841: true,
-                25299: true,
-                26981: true,
-                26982: true,
-                26982: true,
-                5185: true,
-                5186: true,
-                5187: true,
-                5188: true,
-                5189: true,
-                6778: true,
-                8903: true,
-                9758: true,
-                9888: true,
-                9889: true,
-                25297: true,
-                26978: true,
-                26979: true,
-                740: true,
-                8918: true,
-                9862: true,
-                9863: true,
-                26983: true,
+                48443: true, // Regrowth
+                48441: true, // Rejuv
+                48378: true, // Healing Touch
+                48447: true, // Tranquility
+                48451: true, // Lifebloom
+                53251: true, // Wild Growth
+                50464: true, // Nourish
+            })),
+        }, 
+        "Nature's Reach": {
+            maxRank: 2,
+            coeff: (_, rank = 2, spellId) => getThreatCoefficient(1 - 0.15 * rank * (spellId in {
+                48463: true, // Moonfire
+                53201: true, // Starfall
+                21688: true, // Starfire
             })),
         }
     },
@@ -1564,27 +1530,13 @@ const spellFunctions = {
     17057: handler_zero, // Furor
     // 5229: handler_zero, // Enrage
 
-    // Lacerate
-    // https://zidnae.gitlab.io/tbc-armor-penetration-calc/tbc_bear_tc.html
-    // zidnae 267 threat, 0.5 coef
-    // OMEN   285 threat, 0.2 coef
-    33745: handler_lacerate(267, 0.5, "Lacerate"),
+    // Lacerate threat = 515.5 static on application, 0.5x initial and dot damage (before bear mod)
+    33745: handler_lacerate(515.5, 0.5, "Lacerate"),
 
-    // Speculation on modifier https://wowwiki-archive.fandom.com/wiki/Mangle_(bear)
-    // Mangle (Bear) has a threat modifier of 1.5x damage done.
-    // Patch 2.1.0 : Damage increased by 15%, but bonus threat reduced so that overall threat generation will be unchanged.
-    // TODO : Need to add 15% when using 2 part T6 (in P3)
-    // https://tbc.wowhead.com/spell=38447/improved-mangle
-    33878: handler_mangleModDamage("Mangle (Bear) (Rank 1)"),
-    33986: handler_mangleModDamage("Mangle (Bear) (Rank 2)"),
-    33987: handler_mangleModDamage("Mangle (Bear) (Rank 3)"),
+    // Mangle (Bear) threat mod removed in WOTLK
+    48564: handler_damage("Mangle (Bear) (Rank 5)"),
 
-    99: handler_threatOnDebuff(9, "Demoralizing Roar (Rank 1)"),
-    1735: handler_threatOnDebuff(15, "Demoralizing Roar (Rank 2)"),
-    9490: handler_threatOnDebuff(20, "Demoralizing Roar (Rank 3)"),
-    9747: handler_threatOnDebuff(30, "Demoralizing Roar (Rank 4)"),
-    9898: handler_threatOnDebuff(39, "Demoralizing Roar (Rank 5)"),
-    26998: handler_threatOnDebuff(39, "Demoralizing Roar"),
+    26998: handler_threatOnDebuff(47, "Demoralizing Roar"), /// TODO: Verify demo roar threat pre-mod
 
     6795: threatFunctions.concat(handler_taunt, handler_markSourceOnMiss(borders.taunt)), //("Growl"),
     5229: handler_resourcechange, //("Enrage"),
@@ -1604,9 +1556,7 @@ const spellFunctions = {
     9827: handler_damage, //("Pounce"),
     9913: handler_zero, //("Prowl"),
     9846: handler_zero, //("Tiger's Fury"),
-
-    1850: handler_zero, //("Dash (Rank 1)"),
-    9821: handler_zero, //("Dash"),
+    36589: handler_zero, //("Dash"),
 
     8998: handler_castCanMiss(-240, "Cower (Rank 1)"),
     9000: handler_castCanMiss(-390, "Cower (Rank 2)"),

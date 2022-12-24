@@ -292,37 +292,35 @@ const auraImplications = {
         871: 71, //Shield Wall
         // 23922: 71, 23923: 71, 23924: 71, 23925: 71, 25258: 71, 30356: 71, // Shield slam
     },
-    /*
     Druid: {
-        6807: 9634, 6808: 9634, 6809: 9634, 8972: 9634, 9745: 9634, 9880: 9634, 9881: 9634, 26996: 9634, //Maul
-        779: 9634, 780: 9634, 769: 9634, 9754: 9634, 9908: 9634, 26997: 9634, //Swipe
-        99: 9634, 1735: 9634, 9490: 9634, 9747: 9634, 9898: 9634, 26998: 9634, //Demoralizing Roar
-        33878: 9634, 33986: 9634, 33987: 9634, // mangle bear
-        33876: 9634, 33982: 9634, 33983: 9634, // mangle cat
+        26996: 9634, //Maul
+        26997: 9634, // Bear Swipe
+        26998: 9634, //Demoralizing Roar
+        48564: 9634, // mangle bear
+        48566: 9634, // mangle cat
         33745: 9634, // lacerate
         6795: 9634, //Growl
         5229: 9634, //Enrage
         17057: 9634, //Furor
         8983: 9634, //Bash
-        9850: 768, //Claw
-        5221: 768, 6800: 768, 8992: 768, 9829: 768, 9830: 768, 27002: 768,  //Shred
-        9904: 768, //Rake
-        24248: 768, 31018: 768, 22828: 768, 22829: 768, //Ferocious Bite
-        9867: 768, //Ravage
-        9896: 768, 27008: 768, //Rip
-        9827: 768, //Pounce
+        48570: 768, //Claw
+        48572: 768,  //Shred
+        48574: 768, //Rake
+        48577: 768, //Ferocious Bite
+        48579: 768, //Ravage
+        49800: 768, //Rip
+        49803: 768, //Pounce
         9913: 768, //Prowl
         9846: 768, //Tiger's Fury
-        1850: 768, 9821: 768, //Dash
+        36589: 768, //Dash
     }
-    */
 }
 
 const threatFunctions = {
     sourceThreatenTarget(ev, fight, amount, useThreatCoeffs = true, extraCoeff = 1) { // extraCoeff is only used for tooltip text
         let a = fight.eventToUnit(ev, "source");
         let b = fight.eventToUnit(ev, "target");
-        if (!a || !b) {
+        if (!a || !b) {x
             return;
         }
         let coeff = (useThreatCoeffs ? a.threatCoeff(ev.ability) : 1) * extraCoeff;
@@ -586,6 +584,14 @@ function handler_modHeal(multiplier) {
     }
 }
 
+function handler_modHealPlusThreat(multiplier, bonus) {
+    return (ev, fight) => {
+        if (ev.type !== "heal") return;
+        threatFunctions.unitThreatenEnemiesSplit(ev, "source", fight, multiplier * ev.amount / 2);
+        threatFunctions.sourceThreatenTarget(ev, fight, bonus);
+    }
+}
+
 function handler_modDamagePlusThreat(multiplier, bonus) {
     return (ev, fight) => {
         if (ev.type !== "damage" || ev.hitType > 6 || ev.hitType === 0) return;
@@ -643,6 +649,25 @@ function handler_devastate(devastateValue, sunderValue) {
             }
         }
     }
+}
+
+function handler_cat_form(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[9634] = false;
+    source.buffs[768] = true;
+}
+
+file:///home/jfriesenhahn/gits/mobmentality_threat.gifile:///home/jfriesenhahn/gits/mobmentality_threat.github.io/index.html?id=https://classic.warcraftlogs.com/reports/AMR1pdTJgnXZt9vq&fight=&enemy=&target=thub.io/index.html?id=https://classic.warcraftlogs.com/reports/AMR1pdTJgnXZt9vq&fight=&enemy=&target=
+function handler_dire_bear_form(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[9634] = true;
+    source.buffs[768] = false;
+}
+
+function handler_cancel_form(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[9364] = false;
+    source.buffs[768] = false;
 }
 
 function handler_threatAsTargetHealed(ev, fight) {
@@ -1498,71 +1523,57 @@ const spellFunctions = {
     4623: handler_zero, // Lesser stoneshield pot
 
 
+    /* Cancelform triggers */
+    48463: handler_cancel_form, // Moonfire
+    53201: handler_cancel_form, // Starfall
+    21688: handler_cancel_form, // Starfire
+    48443: handler_cancel_form, // Regrowth
+    48441: handler_cancel_form, // Rejuv
+    48378: handler_cancel_form, // Healing Touch
+    48447: handler_cancel_form, // Tranquility
+    48451: handler_cancel_form, // Lifebloom
+    53251: handler_cancel_form, // Wild Growth
+    50464: handler_cancel_form, // Nourish
+
     /* Forms */
-    9634: handler_zero, //(1.45, "Bear Form"),
-    768: handler_zero, //(0.71, "Cat Form"),
+    9634: handler_dire_bear_form, //("Dire Bear Form"),
+    768: handler_cat_form, //("Cat Form"),
 
     /* Bear */
     5209: handler_markSourceOnMiss(borders.taunt), // Challenging Roar
 
-    // https://tbc.wowhead.com/guides/feral-druid-tank-burning-crusade-classic
-
-    // zidnae 322 or 344; unclear
-    // OMEN   322
-    6807: handler_threatOnHit(322 / 67 * 10, "Maul (Rank 1)"),
-    6808: handler_threatOnHit(322 / 67 * 18, "Maul (Rank 2)"),
-    6809: handler_threatOnHit(322 / 67 * 26, "Maul (Rank 3)"),
-    8972: handler_threatOnHit(322 / 67 * 34, "Maul (Rank 4)"),
-    9745: handler_threatOnHit(322 / 67 * 42, "Maul (Rank 5)"),
-    9880: handler_threatOnHit(322 / 67 * 50, "Maul (Rank 6)"),
-    9881: handler_threatOnHit(322 / 67 * 58, "Maul (Rank 7)"),
-    26996: handler_threatOnHit(322, "Maul (Rank 8)"),
-
-    779: handler_modDamage(1, "Swipe (Rank 1)"),
-    780: handler_modDamage(1, "Swipe (Rank 2)"),
-    769: handler_modDamage(1, "Swipe (Rank 3)"),
-    9754: handler_modDamage(1, "Swipe (Rank 4)"),
-    9908: handler_modDamage(1, "Swipe (Rank 5)"),
-    26997: handler_modDamage(1, "Swipe (Rank 6)"),
-
-    // Rage generation, allegedly 0 threat
+    26996: handler_threatOnHit(424), // Maul
+    26997: handler_modDamage(1), // Swipe
+    33745: handler_lacerate(515.5, 0.5), // 515.5 static on application, 0.5x initial and dot damage (before bear mod)
+    48564: handler_damage, // No mangle threat mod in wotlk
+    26998: handler_threatOnDebuff(132), // Demoralizing roar
     16959: handler_zero, // Primal Fury
     17057: handler_zero, // Furor
-    // 5229: handler_zero, // Enrage
-
-    // Lacerate threat = 515.5 static on application, 0.5x initial and dot damage (before bear mod)
-    33745: handler_lacerate(515.5, 0.5, "Lacerate"),
-
-    // Mangle (Bear) threat mod removed in WOTLK
-    48564: handler_damage("Mangle (Bear) (Rank 5)"),
-
-    26998: handler_threatOnDebuff(47, "Demoralizing Roar"), /// TODO: Verify demo roar threat pre-mod
+    5229: handler_zero, // Enrage
 
     6795: threatFunctions.concat(handler_taunt, handler_markSourceOnMiss(borders.taunt)), //("Growl"),
     5229: handler_resourcechange, //("Enrage"),
-    // 17057: handler_resourcechange, //("Furor"),
 
     31786: handler_resourcechange, // Spiritual Attunement
 
     8983: handler_zero, //("Bash"), //TODO test bash threat
 
     /* Cat */
-    9850: handler_damage, //("Claw"),
-    9830: handler_damage, //("Shred"),
-    9904: handler_damage, //("Rake"),
-    22829: handler_damage, //("Ferocious Bite"),
-    9867: handler_damage, //("Ravage"),
-    9896: handler_damage, //("Rip"),
-    9827: handler_damage, //("Pounce"),
+    48566: handler_damage, //("Mangle (Cat)"),
+    48570: handler_damage, //("Claw"),
+    48572: handler_damage, //("Shred"),
+    48574: handler_damage, //("Rake"),
+    48577: handler_damage, //("Ferocious Bite"),
+    48579: handler_damage, //("Ravage"),
+    49800: handler_damage, //("Rip"),
+    49803: handler_damage, //("Pounce"),
     9913: handler_zero, //("Prowl"),
     9846: handler_zero, //("Tiger's Fury"),
+    9846: handler_zero, //("Tiger's Fury"),
     36589: handler_zero, //("Dash"),
+    36589: handler_zero, //("Berserk"),
 
-    8998: handler_castCanMiss(-240, "Cower (Rank 1)"),
-    9000: handler_castCanMiss(-390, "Cower (Rank 2)"),
-    9892: handler_castCanMiss(-600, "Cower"),
-    31709: handler_castCanMiss(-800, "Cower"),
-    27004: handler_castCanMiss(-1170, "Cower"),
+    27004: handler_castCanMiss(-3474, "Cower"),
 
     // Death Knight
     49909: handler_modDamage(7),    // IT is 7x threat in Frost, 1x in Blood/Unholy (before stance multipliers)
@@ -1593,7 +1604,7 @@ const spellFunctions = {
     49576: handler_threatOnDebuffOrDamage(110), // Grip generates 110 threat pre-stance mod after taunt effect
 
     45470: handler_modHeal(.55), // Death Strike
-    48982: handler_modHeal(.55), // Rune Tap // TODO: also generates 55 base threat
+    48982: handler_modHealPlusThreat(.55, 55), // Rune Tap
 
     // TODO: deal with 1x multiplier in unholy/blood for IT
     // TODO: deal with dancing rune weapon threat transfer (maybe)
@@ -1605,17 +1616,9 @@ const spellFunctions = {
     33110: handler_threatAsTargetHealed, // Prayer of mending
 
     /* Abilities */
-    16857: handler_threatOnDebuff(108, "Faerie Fire (Feral)(Rank 1)"),
-    17390: handler_threatOnDebuff(108, "Faerie Fire (Feral)(Rank 2)"),
-    17391: handler_threatOnDebuff(108, "Faerie Fire (Feral)(Rank 3)"),
-    17392: handler_threatOnDebuff(108, "Faerie Fire (Feral)(Rank 4)"),
-    27011: handler_threatOnDebuff(131, "Faerie Fire (Feral)"),
-
-    770: handler_threatOnDebuff(108, "Faerie Fire (Rank 1)"),
-    778: handler_threatOnDebuff(108, "Faerie Fire (Rank 2)"),
-    9749: handler_threatOnDebuff(108, "Faerie Fire (Rank 3)"),
-    9907: handler_threatOnDebuff(108, "Faerie Fire (Rank 3)"),
-    26993: handler_threatOnDebuff(131, "Faerie Fire"),
+    770:   handler_threatOnDebuffOrDamage(132), // Faerie Fire
+    16857: handler_threatOnDebuff(132, "Faerie Fire (Feral)"), // Cat Faerie Fire
+    60089: handler_modDamagePlusThreat(1.0, 132, "Faerie Fire (Feral)"), // Bearie Fire
 
     16870: handler_zero, //("Clearcasting"),
     29166: handler_zero, //("Innervate"),

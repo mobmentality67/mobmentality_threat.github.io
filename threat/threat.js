@@ -370,29 +370,19 @@ class Unit {
                 if (!(bid in this.buffs)) {
                     initialBuffs[bid] = true;
                     this.buffs[bid] = true;
+                    if (this.type=='Druid') break; // Druid needs dynamic form detect
                 }
             } else if (t in buffEvents) {
                 if (Unit.eventToKey(events[i], "target") !== key) continue;
                 let aid = events[i].ability.guid;
                 if (!(aid in notableBuffs)) continue;
-                if (aid === 23397 && t === "applydebuff") { // Special handler for Nefarian's warrior class call
-                    delete this.buffs[71];
-                    delete this.buffs[2457];
-                    this.buffs[2458] = true;
-                }
-                if (aid === 23398) { // Druid class call
-                    if (t === "applydebuff") {
-                        delete this.buffs[5487];
-                        delete this.buffs[9634];
-                        this.buffs[768] = true;
-                    } else if (t === "removedebuff") {
-                        delete this.buffs[768];
-                    }
-                }
                 if (buffEvents[t] === 1) {
                     this.buffs[aid] = true;
                 } else {
-                    if (!(aid in this.buffs)) initialBuffs[aid] = true;
+                    if (!(aid in this.buffs)) {
+                        initialBuffs[aid] = true;
+                        if (this.type=='Druid') break; // Druid needs dynamic form detect
+                    }
                     delete this.buffs[aid];
                 }
             } else if (t === "death") {
@@ -459,7 +449,7 @@ class Unit {
         let spellId = ability ? ability.guid : null;
         let c = this.baseThreatCoeff(spellSchool);
         for (let i in this.buffs) {
-            if (i in buffMultipliers) c *= buffMultipliers[i](spellSchool);
+            if ((i in buffMultipliers) && (this.buffs[i] == true)) c *= buffMultipliers[i](spellSchool);
         }
         for (let i in this.talents) {
             let t = this.talents[i];
@@ -526,8 +516,7 @@ class Player extends Unit {
 
         this.checkWarrior(events); // Extra stance detection
         this.checkPaladin(events); // Extra Righteous Fury detection
-        // this.checkBear(events); // Extra Bear detection
-        // this.checkFaction(tranquilAir); // BoS and tranquil air
+        //this.checkBear(events); // Extra Bear detection
         this.checkInitalStatus(); // Gloves and cloack enchants, talents and buffs
 
         let a = info.initialBuffs;

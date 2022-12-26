@@ -130,11 +130,29 @@
         This is a fork from the great work done by Voomlz to make the tool compatible in WotLK Classic.
         Wrath support is a **work in progress** by Zachatou and Mobmentality (Westfall/Benediction). Please DM on Discord (mobmentality#9406) with any inconsistencies -- VOD with a threat graph helps us sanity check lots!
     </div>
+    <div id="KnownIssues">
+        Known Issues:
+        <li>
+            Pre-casts MDs may not be detected correctly
+        </li>
+        <li>
+            Misdirects on different targets in the same fight from the same hunter may not correctly assign threat
+        </li>
+        <li>
+            Cancelled tricks may not always be correctly detected
+        </li>
+        <li>
+            Some warrior abilities may not have correct static coefficients
+        </li>
+         <li>
+            Active threat drops (HoS) need to be tested against static threat modifiers. Current implementation assumes they are affected
+        </li>
+        <li>
+            Probably others! Please report observed issues <a href="https://github.com/mobmentality67/mobmentality_threat.github.io/issues">here</a>.
+        </li>
     <button onclick="showAndHideDisclaimer()">Note</button>
     <div id="disclaimer" style="display:none">
-        <p>Threat is calculated from the combat logs. Some inaccuracies can occur.</p>
-        <p>For any feedback or inconsistencies feel free to join us on <a href="https://discord.gg/3J4FGUNfW7">
-            discord</a>.
+        <p>Threat is calculated from combat logs -- not all quantities are known. Some things (pre-cast MDs) cannot be detected. Other things may not be fully implemented.</p>
         </p>
     </div>
     <button onclick="showAndHideChangelog()">Changelog</button>
@@ -142,69 +160,7 @@
         <h2>Changelog:</h2>
         <h3>Quality of life:</h3>
         <ul>
-            <li>New browser extension to open directly the threat graph from warcraft logs</li>
-            <a href="https://addons.mozilla.org/en-US/firefox/addon/wcl-threat-link/">
-                Firefox</a>
-            <a href="https://chrome.google.com/webstore/detail/wcl-threat-link/pbhoiekekddmkjfkoalcohlpjgfabkjn?hl=en">
-                Chrome</a>
-            <li>Adding warcraft log url as parameter with '?id=' i.e :</li>
-            <a href="https://voomlz.github.io/threat?id=https://classic.warcraftlogs.com/reports/V84N3Q17vFRaxDhj#fight=12&type=damage-done&source=2">
-                https://voomlz.github.io/threat?id=https://classic.warcraftlogs.com/reports/V84N3Q17vFRaxDhj#fight=12&type=damage-done&source=2</a>
-        </ul>
-        <h3>Warriors:</h3>
-        <ul>
-            <li>New Shield Slam</li>
-            <li>New Heroic Strike</li>
-            <li>Adding devastate</li>
-            <li>Reworking devastate, no sunder threat when expose armor is up</li>
-            <li>Rework Revenge</li>
-            <li>Rework Thunderclap</li>
-            <li>Adding Improved berserker stance</li>
-            <li>Fix Defiance talent</li>
-        </ul>
-        <h3>Druid feral:</h3>
-        <ul>
-            <li>New FF</li>
-            <li>New Demoralizing shout</li>
-            <li>Adding Lacerate</li>
-            <li>Adding Mangle</li>
-            <li>Rework Swipe</li>
-            <li>Rework Maul</li>
-            <li>Fix Feral instict</li>
-        </ul>
-        <h3>Warlock</h3>
-        <ul>
-            <li>Adding Soulshatter</li>
-            <li>Adding Destructive reach</li>
-        </ul>
-        <h3>Shaman</h3>
-        <ul>
-            <li>Adding enchancement reduction talent</li>
-            <li>Adding elemental reduction talent</li>
-            <li>Adding earth shock</li>
-            <li>Adding Lightning Overload procs</li>
-            <li>Earth shock modifier modified to 1 (instead of 2 in classic)</li>
-        </ul>
-        <h3>Hunter</h3>
-        <ul>
-            <li>Adding Missdirection</li>
-        </ul>
-        <h3>Mage</h3>
-        <ul>
-            <li>Adding dummy invisibility. Removing 25% threat when cast and when fades. Need to be fixed to be x% per second or X value per second. Needs more testing and custome code</li>
-        </ul>
-        <h3>Paladin</h3>
-        <ul>
-            <li>Adding rework of Holy shield</li>
-            <li>Adding rework of Avenger shield</li>
-        </ul>
-        <h3>Misc</h3>
-        <ul>
-            <li>Better handling of horde salvation</li>
-            <li>Adding Threat on gloves abd Subtlety buff, automatically</li>
-            <li>Thunderfury nerf</li>
-            <li>Adding missdirection beta</li>
-            <li>Nightbane Threat wipe when he flies</li>
+            <li>Major port from TBC -> WotLK. Still missing support for several items</li>
         </ul>
     </div>
     <button onclick="showAndHideTutorial()">Tutorial</button>

@@ -217,7 +217,7 @@ const talents = {
     DeathKnight: {
         "Subversion": {
             maxRank: 3,
-            coeff: (_, rank = 3) => getThreatCoefficient(1 - 0.25/3 * rank),
+            coeff: (buffs, rank = 3) => getThreatCoefficient(1 - 0.25/3 * rank * ((48265 in buffs) || (48266 in buffs))),
         }
     }
 }
@@ -268,7 +268,20 @@ const notableBuffs = {
     23397: true, // Nefarian's warrior class call
     23398: true, // Druid class call
     29232: true, // Loatheb's fungal creep
+
 };
+
+const stanceBuffs = {
+    48236: true,  // Frost Presence,
+    48266: true,  // Blood Presence,
+    48265: true,  // Unholy Presence,
+    71:    true,  // Defensive Stance
+    2457:  true,  // Battle Stance
+    2458:  true,  // Berserker Stance
+    9634:  true,  // Dire Bear Form
+    768:   true,  // Cat Form
+}
+
 for (let k in buffMultipliers) notableBuffs[k] = true;
 for (let k in invulnerabilityBuffs) notableBuffs[k] = true;
 for (let k in aggroLossBuffs) notableBuffs[k] = true;
@@ -315,6 +328,12 @@ const auraImplications = {
         9913: 768, //Prowl
         9846: 768, //Tiger's Fury
         36589: 768, //Dash
+    },
+    DeathKnight: {
+        48236: 48236, // Frost Presence,
+        48266: 48266, // Blood Presence,
+        48265: 48265, // Unholy Presence,
+        50475: 48266, // Blood presence self-heal
     }
 }
 
@@ -653,13 +672,48 @@ function handler_devastate(devastateValue, sunderValue) {
     }
 }
 
+function handler_icy_touch(ev, fight) {
+        let source = fight.eventToUnit(ev, "source");
+        let coeff = 1.0;
+        if (source.buffs[48236] && (source.buffs[48236] == true)) {
+            coeff = 7.0;
+        }
+        threatFunctions.sourceThreatenTarget(ev, fight, ((ev.amount + (ev.absorbed || 0)) || 0), true, coeff);
+}
+
+function handler_frost_presence(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[48236] = true; // Frost Presence
+    source.buffs[48266] = false; // Blood Presence
+    source.buffs[48265] = false; // Unholy Presence
+}
+
+function handler_blood_presence(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[48236] = false; // Frost Presence
+    source.buffs[48266] = true; // Blood Presence
+    source.buffs[48265] = false; // Unholy Presence
+}
+
+function handler_unholy_presence(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[48236] = false; // Frost Presence
+    source.buffs[48266] = false; // Blood Presence
+    source.buffs[48265] = true; // Unholy Presence
+}
+
+function handler_dire_bear_form(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[9634] = true;
+    source.buffs[768] = false;
+}
+
 function handler_cat_form(ev, fight) {
     let source = fight.eventToUnit(ev, "source");
     source.buffs[9634] = false;
     source.buffs[768] = true;
 }
 
-file:///home/jfriesenhahn/gits/mobmentality_threat.gifile:///home/jfriesenhahn/gits/mobmentality_threat.github.io/index.html?id=https://classic.warcraftlogs.com/reports/AMR1pdTJgnXZt9vq&fight=&enemy=&target=thub.io/index.html?id=https://classic.warcraftlogs.com/reports/AMR1pdTJgnXZt9vq&fight=&enemy=&target=
 function handler_dire_bear_form(ev, fight) {
     let source = fight.eventToUnit(ev, "source");
     source.buffs[9634] = true;
@@ -867,7 +921,7 @@ function handler_partialThreatWipeOnCast(pct) {
 function handler_partialThreatWipeOnEvent(pct) {
     return (ev, fight) => {
         if (ev.type !== "applybuff" && ev.type !== "removebuff") return;
-        let u = fight.eventToUnit(ev, "source");
+        let u = fight.eventToUnit(ev, "target");
         if (!u) return;
 
         let [_, enemies] = fight.eventToFriendliesAndEnemies(ev, "source");
@@ -884,10 +938,18 @@ function handler_partialThreatWipeOnEvent(pct) {
                         let nbSecondElapsed = Math.floor(timeElapsed / 1000);
                         let currentThreat = enemies[k].threat[u.key].currentThreat;
 
+                        let timeToFade = 0.0;
+                        if (ev.ability.name == "Invisibility")
+                            timeToFade = 3.0;
+                        else if (ev.ability.name == "Hand of Salvation") 
+                            timeToFade = 10.0;
+                        else 
+                            console.log("Unknown invisibility type: " + ev.name);
+
                         // scale up by x%
                         currentThreat = currentThreat * (1 + (pct / (1 - pct)));
                         // Then remove threat for the amount of time spent in invis
-                        currentThreat = nbSecondElapsed * (1 - nbSecondElapsed * pct);
+                        currentThreat = currentThreat * nbSecondElapsed / timeToFade * (1-pct);
 
                         enemies[k].setThreat(u.key, currentThreat, ev.timestamp, ev.ability.name);
                     }
@@ -1581,7 +1643,11 @@ const spellFunctions = {
     27004: handler_castCanMiss(-3474, "Cower"),
 
     // Death Knight
-    49909: handler_modDamage(7),    // IT is 7x threat in Frost, 1x in Blood/Unholy (before stance multipliers)
+    48236: handler_frost_presence, // Frost Presence
+    48266: handler_blood_presence, // Blood Presence
+    48265: handler_unholy_presence, // Unholy Presence
+
+    49909: handler_icy_touch,    // IT is 7x threat in Frost, 1x in Blood/Unholy (before stance multipliers)
     52212: handler_modDamage(1.9),  // Death and Decay
     66217: handler_modDamage(1.75),  // Rune Strike
 

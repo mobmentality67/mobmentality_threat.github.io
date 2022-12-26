@@ -71,7 +71,19 @@ async function fetchWCLreport(path, start, end) {
     let t = start;
     let events = [];
     let filter = encodeURI(`type IN ("death","cast","begincast") OR ability.id IN (${Object.keys(notableBuffs).join(',')}) OR (type IN ("damage","heal","healing","miss","applybuff","applybuffstack","refreshbuff","applydebuff","applydebuffstack","refreshdebuff", "resourcechange","resourcechange","absorbed","healabsorbed","leech","drain", "removebuff") AND ability.id NOT IN (${zeroThreatSpells.join(",")}))`);
-    while (typeof t === "number") {
+    while (typeof t === "number") {async function fetchWCLInitialBuffs(path, start, end, abilityId, stack) {
+
+        let t = start;
+        let auras = [];
+        let filter = encodeURI(`(ability.id IN (${Object.keys(stanceBuffs).join(',')})`);
+        while (typeof t === "number") {
+            let json = await fetchWCLv1(`report/events/${path}&start=${t}&end=${end}&sourceAurasPresent`);
+            if (!json.events) throw "Could not parse report " + path;
+            events.push(...json.events);
+            t = json.nextPageTimestamp;
+        }
+        return auras;
+    }
         let json = await fetchWCLv1(`report/events/${path}&start=${t}&end=${end}&filter=${filter}`);
         if (!json.events) throw "Could not parse report " + path;
         events.push(...json.events);
@@ -362,7 +374,7 @@ class Unit {
         for (let i = 0; i < events.length; ++i) {
             if (this.threatCoeff() > 1) this.tank = true;
             let t = events[i].type;
-            if (this.type in auraImplications && t === "cast") {
+            if (this.type in auraImplications && ((t === "cast") || (t === "heal"))) {
                 if (Unit.eventToKey(events[i], "source") !== key) continue;
                 let aid = events[i].ability.guid;
                 if (!(aid in auraImplications[this.type])) continue;
@@ -394,6 +406,9 @@ class Unit {
                 if (this.type === "Hunter") continue; // Feign Death is impossible to distinguish TODO:: JF -> Is it? Check if can add from general events cast
                 this.dies = true;
             }
+        }
+        if (this.type == "DeathKnight") { // If no presence detected, set frost (doesn't detect evil face, shouldn't matter)
+            setDefaultPresence(this, initialBuffs);
         }
         this.buffs = initialBuffs;
         this.initialCoeff = this.threatCoeff();
@@ -594,6 +609,15 @@ class Player extends Unit {
                                 this.talents["Healing Grace"].rank = 0;
                             }
                             break;
+                        case "Warlock": 
+                            this.talents["Improved Drain Soul"].rank = 0; // Assume this is not taken regardless
+                            if (talents[2].id < 20) 
+                                this.talents["Destructive Reach"].rank = 0;
+                            break;
+                        case "DeathKnight": 
+                            if ((talents[2].id >= 5) && (talents[2].id < 20)) 
+                                this.talents["Subversion"].rank = 0;
+                            break;
                     }
                 }
 
@@ -672,6 +696,16 @@ class Player extends Unit {
             return;
         }
     }
+}
+
+function setDefaultPresence(unit, initialBuffs) {
+    if ((unit.buffs[48236] && (unit.buffs[48236] == true)) || // Frost Presence
+        (unit.buffs[48266] && (unit.buffs[48266] == true)) || // Blood Presence
+        (unit.buffs[48265] && (unit.buffs[48265] == true))) // Unholy Presence
+        return false;
+    unit.buffs[48236] = true; // No buff is detected yet, set frost presence
+    initialBuffs[48236] = true;
+    return true;
 }
 
 class NPC extends Unit {
@@ -914,6 +948,7 @@ class Fight {
 
         if ("events" in this) return;
         this.events = await fetchWCLreport(this.reportId + "?", this.start, this.end);
+        this.initialBuffs = await fetchWCLreport(this.reportId + "?", this.start, this.end);
         let startTimes = [];
         for (let sourceID in this.globalUnits) {
             let sourceUnit = this.globalUnits[sourceID];
@@ -1148,6 +1183,10 @@ class Report {
                     f.initialBuffs[9634] = 0;
                     f.initialBuffs[768] = 0;
                     break;
+                case "DeathKnight":
+                    f.initialBuffs[48236] = 0;
+                    f.initialBuffs[48266] = 0;
+                    f.initialBuffs[48265] = 0;
             }
         }
 

@@ -372,7 +372,6 @@ class Unit {
             "removedebuff": 2
         };
         for (let i = 0; i < events.length; ++i) {
-            if (this.threatCoeff() > 1) this.tank = true;
             let t = events[i].type;
             if (this.type in auraImplications && ((t === "cast") || (t === "heal"))) {
                 if (Unit.eventToKey(events[i], "source") !== key) continue;
@@ -403,7 +402,7 @@ class Unit {
                 }
             } else if (t === "death") {
                 if (Unit.eventToKey(events[i], "target") !== key) continue;
-                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguish TODO:: JF -> Is it? Check if can add from general events cast
+                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguishcast
                 this.dies = true;
             }
         }
@@ -419,7 +418,7 @@ class Unit {
         this.lastInvisibility = value;
     }
 
-    handleMisdirectionDamage(amount, ev, fight) { // TODO: Fix MD for Wrath, add tricks
+    handleMisdirectionDamage(amount, ev, fight) {
         let mdAuraForThis = globalMdAuras[this.key];
         for (let i in mdAuraForThis) {
             let md = mdAuraForThis[i];

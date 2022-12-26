@@ -50,7 +50,7 @@ const buffNames = {
 }
 
 const buffMultipliers = {
-    71: getThreatCoefficient(1.3),		    // Defensive Stance
+    71: getThreatCoefficient(2.0735),	    // Defensive Stance
     2457: getThreatCoefficient(0.8),		// Battle Stance
     2458: getThreatCoefficient(0.8),		// Berserker Stance
     48236: getThreatCoefficient(2.0735),	// Frost Presence
@@ -74,14 +74,14 @@ const talents = {
             maxRank: 3,
             coeff: function (buffs, rank = 3) {
                 if (!(71 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient(1 + 0.05 * rank);
+                return getThreatCoefficient(1 + 0.05 * rank* (71 in buffs));
             }
         },
         "Improved Berserker Stance": {
             maxRank: 5,
             coeff: function (buffs, rank = 5) {
                 if (!(2458 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient(1 - 0.02 * rank);
+                return getThreatCoefficient(1 - 0.02 * rank * ((2458 in buffs)));
             }
         },
         "Tactical Mastery": {
@@ -291,13 +291,10 @@ const auraImplications = {
     Warrior: {
         7384: 2457, 7887: 2457, 11584: 2457, 11585: 2457, //Overpower
         100: 2457, 6178: 2457, 11578: 2457, //Charge
-        // 6343: 2457, 8198: 2457, 8204: 2457, 8205: 2457, 11580: 2457, 11581: 2457, //Thunderclap now usable in def stance
         694: 2457, 7400: 2457, 7402: 2457, 20559: 2457, 20560: 2457, //Mocking Blow
         20230: 2457, //Retaliation
-        // 12292: 2457, //Sweeping Strikes now usable in berserker stance
         20252: 2458, 20617: 2458, 20616: 2458, //Intercept
         1680: 2458, //Whirlwind
-        18499: 2458, //Berserker Rage
         1719: 2458, //Recklessness
         6552: 2458, 6554: 2458, //Pummel
         355: 71, //Taunt
@@ -305,7 +302,7 @@ const auraImplications = {
         6572: 71, 6574: 71, 7379: 71, 11600: 71, 11601: 71, 25288: 71, 25269: 71, 30357: 71, //Revenge
         2565: 71, //Shield Block
         871: 71, //Shield Wall
-        // 23922: 71, 23923: 71, 23924: 71, 23925: 71, 25258: 71, 30356: 71, // Shield slam
+        
     },
     Druid: {
         26996: 9634, //Maul
@@ -334,6 +331,7 @@ const auraImplications = {
         48266: 48266, // Blood Presence,
         48265: 48265, // Unholy Presence,
         50475: 48266, // Blood presence self-heal
+        49206: 48265, // Summon garg -- remove this when blood heal correctly detected for UH
     }
 }
 
@@ -726,6 +724,27 @@ function handler_cancel_form(ev, fight) {
     source.buffs[768] = false;
     if (ev.type !== "damage") return;
     threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
+}
+
+function handler_defensive_stance(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[71] = true; // Defensive Stance
+    source.buffs[2457] = false; // Battle Stance
+    source.buffs[2458] = false; // Berserker Stance
+}
+
+function handler_battle_stance(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[71] = false; // Defensive Stance
+    source.buffs[2457] = true; // Battle Stance
+    source.buffs[2458] = false; // Berserker Stance
+}
+
+function handler_berserker_stance(ev, fight) {
+    let source = fight.eventToUnit(ev, "source");
+    source.buffs[71] = false; // Defensive Stance
+    source.buffs[2457] = false; // Battle Stance
+    source.buffs[2458] = true; // Berserker Stance
 }
 
 function handler_threatAsTargetHealed(ev, fight) {
@@ -1436,42 +1455,21 @@ const spellFunctions = {
     6552: handler_threatOnHit(76, "Pummel (Rank 1)"), //TODO: Verify these values ingame
     6554: handler_threatOnHit(116, "Pummel (Rank 2)"),
 
+    46968: handler_damage, // Shockwave
+    
     //TODO : Add tactical mastery talent threat modifier
-    23881: handler_damage, //("Bloodthirst"), //Rank 1
-    23892: handler_damage, //("Bloodthirst"), //Rank 2
-    23893: handler_damage, //("Bloodthirst"), //Rank 3
-    23894: handler_damage, //("Bloodthirst"), //Rank 4
+    23881: handler_damage, //("Bloodthirst")
     23888: handler_zero, //("Bloodthirst"),   //Buff
     23885: handler_zero, //("Bloodthirst"),   //Buff
     23891: handler_heal, // BT heal buff
 
-    //Heroic Strike
-    78: handler_threatOnHit(16, "Heroic Strike"),
-    284: handler_threatOnHit(39, "Heroic Strike"),
-    285: handler_threatOnHit(59, "Heroic Strike"),
-    1608: handler_threatOnHit(78, "Heroic Strike"),
-    11564: handler_threatOnHit(98, "Heroic Strike"),
-    11565: handler_threatOnHit(118, "Heroic Strike"),
-    11566: handler_threatOnHit(137, "Heroic Strike"),
-    11567: handler_threatOnHit(145, "Heroic Strike"),
-    25286: handler_threatOnHit(173, "Heroic Strike"), // (AQ)Rank 9
-    29707: handler_threatOnHit(194, "Heroic Strike"), // Rank 10
-    30324: handler_threatOnHit(220, "Heroic Strike"), // Unused rank ?
+    47450: handler_threatOnHit(259, "Heroic Strike"), 
 
     //Shield Slam
-    23922: handler_threatOnHit(178, "Shield Slam (Rank 1)"), //Rank 1
-    23923: handler_threatOnHit(203, "Shield Slam (Rank 2)"), //Rank 2
-    23924: handler_threatOnHit(229, "Shield Slam (Rank 3)"), //Rank 3
-    23925: handler_threatOnHit(254, "Shield Slam (Rank 4)"), //Rank 4
-    25258: handler_threatOnHit(278, "Shield Slam (Rank 5)"), //Rank 5
-    30356: handler_threatOnHit(305, "Shield Slam"), //Rank 6
+    47488: handler_threatOnHit(770, "Shield Slam"), //Rank 6
 
     //Devastate
-    20243: handler_devastate(100, 301.5, "devastate (Rank 1)"), //Rank 1
-    30016: handler_devastate(100, 301.5, "devastate (Rank 2)"), //Rank 2
-    30022: handler_devastate(100, 301.5, "devastate (Rank 3)"), //Rank 3
-
-    // CF https://github.com/magey/tbc-warrior/wiki/Threat-Values
+    47498: handler_damage,
 
     // Shield Bash
     72: handler_modDamagePlusThreat(1.5, 36),
@@ -1480,78 +1478,57 @@ const spellFunctions = {
     29704: handler_modDamagePlusThreat(1.5, 192),
 
     //Revenge
-    11601: handler_threatOnHit(150), //Rank 5
-    25288: handler_threatOnHit(175), //Rank 6 (AQ)
-    25269: handler_threatOnHit(185), //Rank 7 -- approx
-    30357: handler_threatOnHit(200), //Rank 8
+    6572: handler_threatOnHit(121),
     12798: handler_threatOnHit(20), //("Revenge Stun"),           //Revenge Stun - now +20 threat on tbcc, boss are imumune more often than not
 
     //Cleave
-    845: handler_threatOnHit(10, "Cleave"),  //Rank 1
-    7369: handler_threatOnHit(40, "Cleave"),  //Rank 2
-    11608: handler_threatOnHit(60, "Cleave"),  //Rank 3
-    11609: handler_threatOnHit(70, "Cleave"),  //Rank 4
-    20569: handler_threatOnHit(100, "Cleave"), //Rank 5
-    25231: handler_threatOnHit(125, "Cleave"), //Rank 6
+    47520: handler_threatOnHit(225, "Cleave"),
 
     //Whirlwind
     1680: handler_modDamage(1.25), //("Whirlwind"), //Whirlwind
 
     // Thunderclap
-    6343: handler_modDamage(1.75), // Thunder Clap r1
-    8198: handler_modDamage(1.75), // Thunder Clap r2
-    8204: handler_modDamage(1.75), // Thunder Clap r3
-    8205: handler_modDamage(1.75), // Thunder Clap r4
-    11580: handler_modDamage(1.75), // Thunder Clap r5
-    11581: handler_modDamage(1.75), // Thunder Clap r6
+    47502: handler_modDamage(1.85), 
 
     //Hamstring
-    1715: handler_modDamagePlusThreat(1.25, 20), // R1
-    7372: handler_threatOnHit(101), // R2, from outdated sheet
-    7373: handler_threatOnHit(145, "Hamstring"),
+    1715: handler_threatOnHit(181, "Hamstring"),
 
     //Intercept
     20252: handler_modDamage(2), //Intercept
-    20253: handler_zero, //("Intercept Stun"),         //Intercept Stun (Rank 1)
-    20616: handler_modDamage(2), //Intercept (Rank 2)
-    20614: handler_zero, //("Intercept Stun"),         //Intercept Stun (Rank 2)
-    20617: handler_modDamage(2), //Intercept (Rank 3)
-    20615: handler_zero, //("Intercept Stun"),         //Intercept Stun (Rank 3)
-
+    20253: handler_zero, //("Intercept Stun"),     
+    
     //Execute
-    20647: handler_modDamage(1.25, "Execute"),
-    25236: handler_modDamage(1.25, "Execute"), // rank 7
+    20658: handler_modDamage(1.25, "Execute"),
 
     /* Abilities */
     //Sunder Armor
-    7386: handler_sunderArmor(45), // Rank 1
-    11597: handler_sunderArmor(261, "Sunder Armor"), //Rank 5
-    25225: handler_sunderArmor(301.5, "Sunder Armor"), //Rank 6
+    11597: handler_sunderArmor(345, "Sunder Armor"), //Rank 6
 
     //Battleshout
-    11551: handler_threatOnBuffUnsplit(52, true, "Battle Shout"), //Rank 6
-    25289: handler_threatOnBuffUnsplit(60, true, "Battle Shout"), //Rank 7 (AQ)
-    2048: handler_threatOnBuffUnsplit(69, true, "Battle Shout"), //Rank 8
+    47436: handler_threatOnBuffUnsplit(78, true, "Battle Shout"), 
 
     //Demo Shout
-    11556: handler_threatOnDebuff(43, "Demoralizing Shout"),
-    25203: handler_threatOnDebuff(56, "Demoralizing Shout"), //Rank 7
+    59613: handler_threatOnDebuff(56, "Demoralizing Shout"), 
 
     // Commanding shout
-    469: handler_threatOnBuffUnsplit(69, true, "Commanding Shout"),
-    // 469: handler_threatOnBuff(58, "Commanding Shout"), // 58 threat on Omen (tbc vanilla)
+    469: handler_threatOnBuffUnsplit(80, true, "Commanding Shout"),
 
     //Mocking Blow
     20560: threatFunctions.concat(handler_damage, handler_markSourceOnMiss(borders.taunt)), //("Mocking Blow"),
 
     //Overpower
-    11585: handler_damage, //("Overpower"),
+    115857384: handler_damage, //("Overpower"),
 
     //Rend
-    11574: handler_damage, //("Rend"),
+    47465: handler_damage, //("Rend"),
 
     // Spell reflect
     23920: handler_spellReflectCast,
+
+    // Stances
+    71: handler_battle_stance,
+    2457: handler_defensive_stance,
+    2458: handler_berserker_stance,
 
 
     /* Zero threat abilities */

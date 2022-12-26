@@ -113,8 +113,10 @@ const talents = {
             maxRank: 2,
             coeff: (_, rank = 2, spellId) => getThreatCoefficient(1 - 0.15 * rank * (spellId in {
                 48463: true, // Moonfire
-                53201: true, // Starfall
-                21688: true, // Starfire
+                53201: true, // Starfall talent spell
+                53190: true, // Starfall glyphed?
+                53195: true, // Starfall unglyphed?
+                48465: true, // Starfire
             })),
         }
     },
@@ -668,6 +670,8 @@ function handler_cancel_form(ev, fight) {
     let source = fight.eventToUnit(ev, "source");
     source.buffs[9364] = false;
     source.buffs[768] = false;
+    if (ev.type !== "damage") return;
+    threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
 }
 
 function handler_threatAsTargetHealed(ev, fight) {
@@ -1526,7 +1530,7 @@ const spellFunctions = {
     /* Cancelform triggers */
     48463: handler_cancel_form, // Moonfire
     53201: handler_cancel_form, // Starfall
-    21688: handler_cancel_form, // Starfire
+    48465: handler_cancel_form, // Starfire
     48443: handler_cancel_form, // Regrowth
     48441: handler_cancel_form, // Rejuv
     48378: handler_cancel_form, // Healing Touch
@@ -1534,6 +1538,7 @@ const spellFunctions = {
     48451: handler_cancel_form, // Lifebloom
     53251: handler_cancel_form, // Wild Growth
     50464: handler_cancel_form, // Nourish
+    48470: handler_cancel_form, // GOTW
 
     /* Forms */
     9634: handler_dire_bear_form, //("Dire Bear Form"),

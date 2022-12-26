@@ -57,5 +57,6 @@ const classColors = {
 	"Shaman": "#0070de",
 	"Warlock": "#8787ed",
 	"Warrior": "#c79c6e",
+	"DeathKnight": "#B94141",
 	"Pet": "#00ff96",
 }

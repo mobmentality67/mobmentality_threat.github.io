@@ -370,7 +370,9 @@ class Unit {
                 if (!(bid in this.buffs)) {
                     initialBuffs[bid] = true;
                     this.buffs[bid] = true;
-                    if (this.type=='Druid') break; // Druid needs dynamic form detect
+                    if (this.type == "Druid" || 
+                       (this.type == "Warrior" || 
+                       (this.type == "DeathKnight"))) break; // Druid needs dynamic form detect
                 }
             } else if (t in buffEvents) {
                 if (Unit.eventToKey(events[i], "target") !== key) continue;
@@ -381,7 +383,9 @@ class Unit {
                 } else {
                     if (!(aid in this.buffs)) {
                         initialBuffs[aid] = true;
-                        if (this.type=='Druid') break; // Druid needs dynamic form detect
+                        if (this.type == "Druid" || 
+                           (this.type == "Warrior" || 
+                           (this.type == "DeathKnight"))) break; // Druid needs dynamic form detect
                     }
                     delete this.buffs[aid];
                 }
@@ -444,7 +448,6 @@ class Unit {
          */
 
         if (this.insignificance) return 0;
-
         let spellSchool = ability ? ability.type : this.spellSchool;
         let spellId = ability ? ability.guid : null;
         let c = this.baseThreatCoeff(spellSchool);

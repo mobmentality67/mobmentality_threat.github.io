@@ -246,7 +246,7 @@ const aggroLossBuffs = {
     24327: true, // Hakkar's Cause Insanity
     23603: true, // Nefarian: Wild Polymorph
     26580: true, // Princess Yauj: Fear
-    28410: true, // Kelthuzad: Chains of Kelthuzad
+    28410: true, // Chains of Kel'Thuzad
 }
 // These make dots orange
 const fixateBuffs = {
@@ -268,7 +268,7 @@ const notableBuffs = {
     23397: true, // Nefarian's warrior class call
     23398: true, // Druid class call
     29232: true, // Loatheb's fungal creep
-
+    28410: true, // Chains of Kel'Thuzad
 };
 
 const stanceBuffs = {
@@ -761,6 +761,14 @@ function handler_bossDropThreatOnHit(pct) {
     }
 }
 
+function handler_ChainsOfKelThuzad(ev, fight) {
+    let a = fight.eventToUnit(ev, "source");
+    let b = fight.eventToUnit(ev, "target");
+    if (!a || !b) return;
+    a.checkTargetExists(b.key, ev.timestamp);
+    a.setThreat(b.key, 0, ev.timestamp, ev.ability.name);
+}
+
 let lastSpellReflectEvent;
 
 function handler_spellReflectCast(ev) {
@@ -1149,7 +1157,7 @@ const spellFunctions = {
     26580: handler_bossDropThreatOnHit(0), // Yauj's Fear
     26561: handler_bossThreatWipeOnCast, // Vem's Berserker Charge
     11130: handler_bossDropThreatOnHit(0.5), // Qiraji Champion's Knock Away, need to confirm pct
-    28408: handler_bossThreatWipeOnCast, // Kel'Thuzad's Chains of Kel'Thuzad
+    28410: handler_ChainsOfKelThuzad, // Kel'Thuzad's Chains of Kel'Thuzad
     33237: handler_bossThreatWipeOnCast, // Kiggler the Crazed arcane explosion - HKM fight
     //37676: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Leotheras demon form
     37098: handler_nightbaneThreatWipeOnCast((43 * 1000)), // Nightbane's Rain of Bones. delay : 43 sec is the timer according to DBM

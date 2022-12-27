@@ -1114,6 +1114,23 @@ class Fight {
             }
         }
 
+        // Store position for boss melee range detection
+        let source = this.eventToUnit(ev, "source");
+        if (source) {
+            if (ev.x) {
+                source.lastX = ev.x;
+                source.lastY = ev.y;
+            }
+        }
+        let target = this.eventToUnit(ev, "target");
+        if (target) {
+            if (ev.x) {
+                target.lastX = ev.x;
+                target.lastY = ev.y;
+            }
+        }
+
+
         let f = handler_basic;
         if ("ability" in ev && ev.ability.guid in spellFunctions) {
             f = spellFunctions[ev.ability.guid];

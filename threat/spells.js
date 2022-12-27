@@ -794,20 +794,52 @@ function handler_selfDamageOnSpellReflect() {
 
 function handler_hatefulstrike(mainTankThreat, offTankThreat) {
     return (ev, fight) => {
-        if (document.getElementById("gruul-hurtfull") === null) return;
-        if (document.getElementById("gruul-hurtfull").checked === false) return;
-
-        let threatVal = document.getElementById("gruul-hurtfull-value").value;
-        if (threatVal) mainTankThreat = threatVal;
-
         // hitType 0=miss, 7=dodge, 8=parry, 10 = immune, 14=resist, ...
-        if ((ev.type !== "damage") || /*(ev.hitType > 6 && ev.hitType !== 10 && ev.hitType !== 14) || */ ev.hitType === 0) return;
-        let a = fight.eventToUnit(ev, "source");
-        let b = fight.eventToUnit(ev, "target");
-        if (!a || !b) return;
-        a.addThreat(a.target.key, mainTankThreat, ev.timestamp, ev.ability.name, 1);
-        a.addThreat(b.key, offTankThreat, ev.timestamp, ev.ability.name, 1);
+        if ((ev.type !== "damage") || (ev.hitType > 6 && ev.hitType !== 10 && ev.hitType !== 14) || ev.hitType === 0) return;
+        let source = fight.eventToUnit(ev, "source");
+        let target = fight.eventToUnit(ev, "target");
+        if (!source || !target) return;
+
+        let meleeRangedThreat = [];
+        let [friendlies, enemies] = fight.eventToFriendliesAndEnemies(ev, "target");
+        for (k in friendlies) {
+
+            let x1 = ev.x - friendlies[k].lastX;
+            let y1 = ev.y - friendlies[k].lastY;
+
+            let c = Math.sqrt(x1 * x1 + y1 * y1);
+
+            if (c < 1400) {
+                // Arbitraty distance of 1400, we don't really know the exact
+                //console.log(friendlies[k].name + " is in melee range of patchwerk")
+
+                // Order patchwerk threat list, take the first 4th in this condition
+
+                if (source.threat[k]) {
+                    let threat = {};
+                    threat = {
+                        'threat': source.threat[k].currentThreat,
+                        'unit': friendlies[k]
+                    }
+                    meleeRangedThreat.push(threat);
+                }
+            }
+        }
+        sortByKey(meleeRangedThreat, 'threat');
+        let topThreeThreatInMelee = meleeRangedThreat.slice(-3)
+
+        for (let top in topThreeThreatInMelee) {
+            source.addThreat(topThreeThreatInMelee[top].unit.key, mainTankThreat, ev.timestamp, ev.ability.name, 1);
+        }
     }
+}
+
+function sortByKey(array, key) {
+    return array.sort(function (a, b) {
+        var x = a[key];
+        var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
 }
 
 function handler_bossDropThreatOnDebuff(pct) {
@@ -1154,7 +1186,7 @@ const spellFunctions = {
 
     // testing if it works like Patchwerk ? Only on off tank?
     33813: handler_hatefulstrike(1500, 0), // Gruul's hurtfulstrike
-    59192: handler_hatefulstrike(1000, 2000), // Patchwerk's hateful strike. TODO: Check WOTLK threat value
+    59192: handler_hatefulstrike(1500, 2500), // Patchwerk's hateful strike. TODO: Check WOTLK threat value
 
     //17624: handler_vanish, // Flask of Petrification
 

@@ -595,52 +595,54 @@ class Player extends Unit {
                     // Talent format [0/44/17]
                     // Just guessing people with enough point do take the talents, and thus infer it
                     let talents = combatantInfoElement.talents;
-                    switch (this.type) {
-                        case "Warrior" :
-                            if (talents[1].id < 35) {
-                                this.talents["Improved Berserker Stance"].rank = 0;
-                            }
-                            if (talents[0].id < 8) {
-                                this.talents["Tactical Mastery"].rank = 0;
-                            }
-                            if (talents[2].id < 10) {
-                                this.talents["Defiance"].rank = 0;
-                            }
-                            break;
-                        case "Druid":
-                            if (talents[0].id < 15)
-                                this.talents["Nature's Reach"].rank = 0;
-                            if (talents[2].id < 20)
-                                this.talents["Subtlety"].rank = 0;
-                            
-                            break;
-                        case "Paladin" :
-                            if (talents[2].id < 40) {
-                                this.talents["Fanaticism"].rank = 0;
-                            }
-                            break;
-                        case "Shaman" :
-                            if (talents[0].id < 28) {
-                                this.talents["Elemental Precision (fire)"].rank = 0;
-                                this.talents["Elemental Precision (nature)"].rank = 0;
-                                this.talents["Elemental Precision (frost)"].rank = 0;
-                            }
-                            if (talents[1].id < 21) {
-                                this.talents["Spirit Weapons"].rank = 0;
-                            }
-                            if (talents[2].id < 13) {
-                                this.talents["Healing Grace"].rank = 0;
-                            }
-                            break;
-                        case "Warlock": 
-                            this.talents["Improved Drain Soul"].rank = 0; // Assume this is not taken regardless
-                            if (talents[2].id < 20) 
-                                this.talents["Destructive Reach"].rank = 0;
-                            break;
-                        case "DeathKnight": 
-                            if ((talents[2].id >= 5) && (talents[2].id < 20)) 
-                                this.talents["Subversion"].rank = 0;
-                            break;
+                    if (talents.length != 0) { // Avoiding crashes, only seen in this in pre-Wrath logs
+                        switch (this.type) {
+                            case "Warrior" :
+                                if (talents[1].id < 35) {
+                                    this.talents["Improved Berserker Stance"].rank = 0;
+                                }
+                                if (talents[0].id < 8) {
+                                    this.talents["Tactical Mastery"].rank = 0;
+                                }
+                                if (talents[2].id < 10) {
+                                    this.talents["Defiance"].rank = 0;
+                                }
+                                break;
+                            case "Druid":
+                                if (talents[0].id < 15)
+                                    this.talents["Nature's Reach"].rank = 0;
+                                if (talents[2].id < 20)
+                                    this.talents["Subtlety"].rank = 0;
+                                
+                                break;
+                            case "Paladin" :
+                                if (talents[2].id < 40) {
+                                    this.talents["Fanaticism"].rank = 0;
+                                }
+                                break;
+                            case "Shaman" :
+                                if (talents[0].id < 28) {
+                                    this.talents["Elemental Precision (fire)"].rank = 0;
+                                    this.talents["Elemental Precision (nature)"].rank = 0;
+                                    this.talents["Elemental Precision (frost)"].rank = 0;
+                                }
+                                if (talents[1].id < 21) {
+                                    this.talents["Spirit Weapons"].rank = 0;
+                                }
+                                if (talents[2].id < 13) {
+                                    this.talents["Healing Grace"].rank = 0;
+                                }
+                                break;
+                            case "Warlock": 
+                                this.talents["Improved Drain Soul"].rank = 0; // Assume this is not taken regardless
+                                if (talents[2].id < 20) 
+                                    this.talents["Destructive Reach"].rank = 0;
+                                break;
+                            case "DeathKnight": 
+                                if ((talents[2].id >= 5) && (talents[2].id < 20)) 
+                                    this.talents["Subversion"].rank = 0;
+                                break;
+                        }
                     }
                 }
 

@@ -128,31 +128,29 @@
 <div id="info">
     <div id="Wrath">
         This is a fork from the great work done by Voomlz to make the tool compatible in WotLK Classic.
-        Wrath support is in an early alpha state -- much works remain -- Mobmentality and Zachatou (Westfall/Benediction). Please DM on Discord (mobmentality#9406) with any inconsistencies -- VOD with a threat graph helps us sanity check lots!
+        Wrath support is in an early alpha state -- much works remain -- from Zachatou (Zachatou#1282) and Mobmentality (mobmentality#9406) -- (Westfall/Benediction). We expect issues and would love your help finding them. Please DM us Discord with any inconsistencies -- a VOD with a threat graph would be incredible for helping compare values. 
     </div>
+    <br>
     <div id="KnownIssues">
         Known Issues:
         <li>
-            Pre-casts MDs may not be detected correctly
+            Pre-casts MDs do not assign threat to anyone
         </li>
         <li>
-            Misdirects on different targets in the same fight from the same hunter may not correctly assign threat
-        </li>
-        <li>
-            Cancelled tricks may not always be correctly detected
-        </li>
-        <li>
-            Some warrior abilities may not have correct static coefficients
+            Warrior AP detection for devestate and sunder armor does not work
         </li>
          <li>
             Active threat drops (HoS) need to be tested against static threat modifiers. Current implementation assumes they are affected
         </li>         
         <li>
-            Unholy DKs coefficients may incorrectly be assigned
+            Unholy DKs coefficients may incorrectly be assigned as having subversion
         </li>
         <li>
             Probably others! Please report observed issues <a href="https://github.com/mobmentality67/mobmentality_threat.github.io/issues">here</a>.
         </li>
+    </div>
+    <br>
+
     <button onclick="showAndHideDisclaimer()">Note</button>
     <div id="disclaimer" style="display:none">
         <p>Threat is calculated from combat logs -- not all quantities are known. Some things (pre-cast MDs) cannot be detected. Other things may not be fully implemented.</p>
@@ -161,9 +159,8 @@
     <button onclick="showAndHideChangelog()">Changelog</button>
     <div id="changelog" style="display:none">
         <h2>Changelog:</h2>
-        <h3>Quality of life:</h3>
         <ul>
-            <li>Major port from TBC -> WotLK. Still missing support for several items</li>
+            <li>0.1: Alpha -- major port from TBC -> WotLK. Still missing support for several areas</li>
         </ul>
     </div>
     <button onclick="showAndHideTutorial()">Tutorial</button>
@@ -173,7 +170,7 @@
                 https://classic.warcraftlogs.com/reports/TvCLWArKDBYbw6Hk#fight=last) or only the id (ex:
                 TvCLWArKDBYbw6Hk)
             </li>
-            <li>2. Go to https://voomlz.github.io/</li>
+            <li>2. Go to https://mobmentality67.github.io/mobmentality_threat.github.io/</li>
             <li>3. Past your ID/report url in 'Report ID'</li>
             <li>4. Clic on 'Fetch'</li>
             <li>5. Select the fight you wanna see</li>
@@ -193,6 +190,7 @@
         <ul>
             <li>1. Try to force refresh the website (ctrl f5 on chrome)</li>
             <li>2. Double check the default buffs that were inferred to the players</li>
+            <li>3. If it still seems incorrect, please report it <a href="https://github.com/mobmentality67/mobmentality_threat.github.io/issues">here</a>.
         </ul>
     </div>
 </div>

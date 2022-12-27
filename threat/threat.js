@@ -469,22 +469,6 @@ class Unit {
     }
 
     threatCoeff(ability) {
-        //, event) { // Ability is of type {type: (int)spellSchool, guid: (int)spellId, [name: string]}
-
-        /*
-        let auras = playersAuras.get(this.key);
-
-        for (let i in auras) {
-            console.log("Aura : " + auras[i].name);
-            for (const buff of buffMultipliers) {
-                if (auras[i].guid === buff) {
-                    console.log("Found buff " + auras[i].name + " for " + this.name);
-                }
-            }
-        }
-
-         */
-
         if (this.insignificance) return 0;
         let spellSchool = ability ? ability.type : this.spellSchool;
         let spellId = ability ? ability.guid : null;
@@ -498,7 +482,6 @@ class Unit {
             let coeff = t.coeff(this.buffs, t.rank, spellId);
             c *= coeff(spellSchool);
         }
-
         return c;
     }
 

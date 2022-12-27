@@ -1557,8 +1557,8 @@ const spellFunctions = {
     12809: handler_modDamage(2.0),
 
     // Stances
-    71: handler_battle_stance,
-    2457: handler_defensive_stance,
+    71: handler_defensive_stance,
+    2457: handler_battle_stance,
     2458: handler_berserker_stance,
 
 

@@ -335,6 +335,11 @@ const auraImplications = {
     }
 }
 
+const tricksRecipients = {
+    57933: true,
+    396936: true,
+};
+
 const threatFunctions = {
     sourceThreatenTarget(ev, fight, amount, useThreatCoeffs = true, extraCoeff = 1) { // extraCoeff is only used for tooltip text
         let a = fight.eventToUnit(ev, "source");
@@ -635,40 +640,30 @@ function handler_threatOnHit(threatValue) {
     }
 }
 
-let lastSunderEvent;
+function getAttackPower() {
+    return 5200; // Major fix required here, pending some decent way to query AP
+}
+
 
 function handler_sunderArmor(threatValue) {
     return (ev, fight) => {
         if (ev.type === "cast") {
-            threatFunctions.sourceThreatenTarget(ev, fight, threatValue);
+            let sunderThreat = getAttackPower()  * .05 + threatValue; // Needs fix to query AP
+            threatFunctions.sourceThreatenTarget(ev, fight, sunderThreat);
             return;
         }
-
-        if (ev.type === "applydebuffstack") {
-            lastSunderEvent = ev;
-        }
     }
 }
 
-function handler_devastate(devastateValue, sunderValue) {
+function handler_devastate(devastateValue) {
     return (ev, fight) => {
         if (ev.type !== "damage" || ev.hitType > 6 || ev.hitType === 0) return;
-        threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0) + devastateValue);
-
-        // Little hack to manage the case where we have multiple warrior sundering.
-        // In WCL, only one will be considered as source of all sunder debuff on one target.
-
-        if (lastSunderEvent) {
-            if (lastSunderEvent.timestamp === ev.timestamp) {
-                let source = fight.eventToUnit(ev, "source");
-                let target = fight.eventToUnit(ev, "target");
-                if (!source) return;
-                if (!target) return;
-                target.addThreat(source.key, sunderValue, ev.timestamp, lastSunderEvent.ability.name + " (Devastate)", source.threatCoeff(lastSunderEvent.ability));
-            }
-        }
+        let devThreat = getAttackPower()  * .05 + ev.amount + (ev.absorbed || 0) + devastateValue;
+        threatFunctions.sourceThreatenTarget(ev, fight, devThreat);
     }
 }
+
+
 
 function handler_icy_touch(ev, fight) {
         let source = fight.eventToUnit(ev, "source");
@@ -1000,7 +995,7 @@ function handler_partialThreatWipeOnEvent(pct) {
                         // scale up by x%
                         currentThreat = currentThreat * (1 + (pct / (1 - pct)));
                         // Then remove threat for the amount of time spent in invis
-                        currentThreat = currentThreat * nbSecondElapsed / timeToFade * (1-pct);
+                        currentThreat = currentThreat * nbSecondElapsed / timeToFade * (1-(pct * timeToFade));
 
                         enemies[k].setThreat(u.key, currentThreat, ev.timestamp, ev.ability.name);
                     }
@@ -1186,7 +1181,7 @@ const spellFunctions = {
 
     // testing if it works like Patchwerk ? Only on off tank?
     33813: handler_hatefulstrike(1500, 0), // Gruul's hurtfulstrike
-    59192: handler_hatefulstrike(1500, 2500), // Patchwerk's hateful strike. TODO: Check WOTLK threat value
+    59192: handler_hatefulstrike(1500, 2500), // Patchwerk's hateful strike. TODO: Check WOTLK threat value, just an approximation now
 
     //17624: handler_vanish, // Flask of Petrification
 
@@ -1482,11 +1477,8 @@ const spellFunctions = {
     32182: handler_zero, // Heroism
     2825: handler_zero, // Bloodlust
 
-    /* Physical */
+    /* Warrior: https://github.com/magey/wotlk-warrior/issues/21 */
     12721: handler_damage, //("Deep Wounds"),
-    6552: handler_threatOnHit(76, "Pummel (Rank 1)"), //TODO: Verify these values ingame
-    6554: handler_threatOnHit(116, "Pummel (Rank 2)"),
-
     46968: handler_damage, // Shockwave
     
     //TODO : Add tactical mastery talent threat modifier
@@ -1495,19 +1487,20 @@ const spellFunctions = {
     23885: handler_zero, //("Bloodthirst"),   //Buff
     23891: handler_heal, // BT heal buff
 
+    // Heroic strike
     47450: handler_threatOnHit(259, "Heroic Strike"), 
 
+    // Heroic Throw
+    57755: handler_modDamage(1.5),
+
     //Shield Slam
-    47488: handler_threatOnHit(770, "Shield Slam"), //Rank 6
+    47488: handler_modDamagePlusThreat(1.3, 770), // Shield Slam
 
     //Devastate
-    47498: handler_damage,
+    47498: handler_devastate(315), // Devestate threat = 315 + 5% of AP + dam
 
     // Shield Bash
-    72: handler_modDamagePlusThreat(1.5, 36),
-    1671: handler_modDamagePlusThreat(1.5, 96),
-    1672: handler_modDamagePlusThreat(1.5, 156),
-    29704: handler_modDamagePlusThreat(1.5, 192),
+    72: handler_threatOnHit(36),
 
     //Revenge
     6572: handler_threatOnHit(121),
@@ -1525,6 +1518,9 @@ const spellFunctions = {
     //Hamstring
     1715: handler_threatOnHit(181, "Hamstring"),
 
+    // Slam
+    47475: handler_threatOnHit(140),
+
     //Intercept
     20252: handler_modDamage(2), //Intercept
     20253: handler_zero, //("Intercept Stun"),     
@@ -1534,28 +1530,31 @@ const spellFunctions = {
 
     /* Abilities */
     //Sunder Armor
-    11597: handler_sunderArmor(345, "Sunder Armor"), //Rank 6
+    11597: handler_sunderArmor(360, "Sunder Armor"),
 
     //Battleshout
     47436: handler_threatOnBuffUnsplit(78, true, "Battle Shout"), 
 
     //Demo Shout
-    59613: handler_threatOnDebuff(56, "Demoralizing Shout"), 
+    59613: handler_threatOnDebuff(63, "Demoralizing Shout"), 
 
     // Commanding shout
     469: handler_threatOnBuffUnsplit(80, true, "Commanding Shout"),
 
     //Mocking Blow
-    20560: threatFunctions.concat(handler_damage, handler_markSourceOnMiss(borders.taunt)), //("Mocking Blow"),
+    20560: threatFunctions.concat(handler_modDamage(3.0), handler_markSourceOnMiss(borders.taunt)), //("Mocking Blow"),
 
     //Overpower
-    115857384: handler_damage, //("Overpower"),
+    7384: handler_damage, //("Overpower"),
 
     //Rend
     47465: handler_damage, //("Rend"),
 
     // Spell reflect
     23920: handler_spellReflectCast,
+
+    // Concussion blow
+    12809: handler_modDamage(2.0),
 
     // Stances
     71: handler_battle_stance,
@@ -1568,7 +1567,6 @@ const spellFunctions = {
     1161: handler_markSourceOnMiss(borders.taunt), //("Challenging Shout"), //Challenging Shout
     2687: handler_resourcechangeCoeff, //("Bloodrage"), //Bloodrage (cast)
     29131: handler_resourcechange, //("Bloodrage"), //Bloodrage (buff)
-    29478: handler_zero, //("Battlegear of Might"), //Battlegear of Might
     23602: handler_zero, //("Shield Specialization"), //Shield Specialization
     12964: handler_resourcechange, //("Unbridled Wrath"), //Unbridled Wrath
     11578: handler_zero, //("Charge"), //Charge
@@ -1596,6 +1594,7 @@ const spellFunctions = {
     28515: handler_zero, // Iron shield pot
     13455: handler_zero, // Greater stoneshield pot
     4623: handler_zero, // Lesser stoneshield pot
+    40093: handler_zero, // Indestructible potion
 
 
     /* Cancelform triggers */

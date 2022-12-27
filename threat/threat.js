@@ -11,6 +11,9 @@ let colorByClass = true;
 let combatantInfo = [];
 const globalMdAuras = [];
 const globalMdTargets = [];
+const globalTricksAuras = [];
+const globalTricksTargets = [];
+const globalRedirectAuras = [];
 let splitHealingThreatOption = true;
 
 /*
@@ -75,7 +78,6 @@ async function fetchWCLreport(path, start, end) {
 
         let t = start;
         let auras = [];
-        let filter = encodeURI(`(ability.id IN (${Object.keys(stanceBuffs).join(',')})`);
         while (typeof t === "number") {
             let json = await fetchWCLv1(`report/events/${path}&start=${t}&end=${end}&sourceAurasPresent`);
             if (!json.events) throw "Could not parse report " + path;
@@ -146,10 +148,10 @@ async function fetchWCLMisdirectionUptime(path, start, end, source) {
 }
 
 async function fetchWCLMisdirectionCasts(path, start, end, source) {
-    let query = `report/tables/casts/${path}&start=${start}&end=${end}&abilityid=34477&sourceid=${source}`;
+    let query = `report/events/casts/${path}&start=${start}&end=${end}&abilityid=34477&sourceid=${source}`;
     let json = await fetchWCLv1(query);
     if (!json) throw "Could not parse report " + path;
-    return json.entries;
+    return json.events;
 }
 
 async function fetchWCLTricksUptime(path, start, end, source) {
@@ -163,9 +165,32 @@ async function fetchWCLTricksUptime(path, start, end, source) {
 async function fetchWCLTricksCasts(path, start, end, source) {
     let query = `report/tables/buffs/${path}&start=${start}&end=${end}&abilityid=57933&sourceid=${source}`;
     let json = await fetchWCLv1(query);
+
+    let otherTricksQuery = `report/tables/buffs/${path}&start=${start}&end=${end}&abilityid=396937&sourceid=${source}`;
+    let otherJson = await fetchWCLv1(otherTricksQuery);
+
     if (!json) throw "Could not parse report " + path;
+    
+    json.auras = json.auras.concat(otherJson.auras);
     json.auras.source = source;
     return json.auras;
+}
+
+async function fetchWCLAttackPower(path, start, end, source) {
+    let query = `report/events/resources/${path}&start=${start}&end=${end}&abilityid=1001&sourceid=${source}`;
+    let json = await fetchWCLv1(query);
+    if (!json) throw "Could not parse report " + path;
+    return json.events;
+}
+
+function mergeRedirectAuras() {
+    let totalIndex = Math.max(globalMdAuras.length, globalTricksAuras.length);
+    for (let index = 0; index < totalIndex; index++) {
+        if (globalMdAuras[index])
+            globalRedirectAuras[index] = globalMdAuras[index];
+        else if (globalTricksAuras[index])
+            globalRedirectAuras[index] = globalTricksAuras[index];
+    }
 }
 
 class ThreatTrace {
@@ -419,18 +444,17 @@ class Unit {
     }
 
     handleMisdirectionDamage(amount, ev, fight) {
-        let mdAuraForThis = globalMdAuras[this.key];
+        let mdAuraForThis = globalRedirectAuras[this.key];
         for (let i in mdAuraForThis) {
             let md = mdAuraForThis[i];
             for (let j in md.bands) {
                 let band = md.bands[j];
-                // Adding a delay for projectile traveling time...
-                // 3 seconds
-                if (ev.timestamp >= band.startTime && band.endTime + (3 * 1000) >= ev.timestamp) {
+                // Allow 2.5 seconds leeway for projectile travel time
+                if (ev.timestamp >= band.startTime && band.endTime + (2.5 * 1000) >= ev.timestamp) {
                     let b = fight.eventToUnit(ev, "target");
                     if (b) {
-                        if (band.target != null) { // If this is an unknown target from pre-cast, don't add the threat to anyone
-                            console.log("[" + ev.timestamp + "] Redirecting " + amount + " from " + this.name + " to " + band.target);
+                        if (band.name != null) { // If this is an unknown target from pre-cast, don't add the threat to anyone
+                            console.log("[" + ev.timestamp + "] Redirecting " + amount + " from " + this.name + " to " + band.name);
                             b.addThreat(band.id, amount, ev.timestamp, "Redirect (" + ev.ability.name + ")", this.threatCoeff(ev.ability));
                         }
                         else {
@@ -888,57 +912,71 @@ class Fight {
         this.tranquilAir = false;
     }
 
-    insertBand(allTargetBands, targetBands, targetID, name) {
-        for (let band in targetBands) {
-            targetBands[band].name = name;
-            targetBands[band].id = targetID;
-            allTargetBands.push(targetBands[band]);
-        }
+    insertBand(allTargetBands, targetBand, targetID, name) {
+        targetBand.name = name;
+        targetBand.id = targetID;
+        allTargetBands.push(targetBand);
     }
 
     setupMDBands(unitId, misdirectionCasts) {
         let mdCastIndex = 0;
         let mdSourceBands = globalMdAuras[unitId][0];
-        let sourceClass = this.globalUnits[unitId].type;
-
         let mdTargetsOrdered = [];
-        for (let target in globalMdTargets[unitId]) {
-            if (globalMdTargets[unitId][target].bands) {
-                this.insertBand(mdTargetsOrdered, globalMdTargets[unitId][target].bands, globalMdTargets[unitId][target].id, globalMdTargets[unitId][target].name);
-            }
-            else {
-                this.insertBand(mdTargetsOrdered, globalMdTargets[unitId][target].bands, globalMdTargets[unitId][target].id, globalMdTargets[unitId][target].name);
-            }
-        }
-        mdTargetsOrdered.sort(compareBand);
 
-        for (let bandIndex in mdSourceBands.bands) { // Iterate over bands to find a target
+        let mdCastsFromSource = globalMdTargets[unitId];
+        let mdBandsFromSource = globalMdAuras[unitId][0].bands;
+        let bandIndex = 0;
+        if (mdCastsFromSource.length < mdBandsFromSource.length) { // If less MD casts than auras, one aura is from a pre-cast MD
+            bandIndex = 1; // If there's a pre-cast MD, ignore the first band -- unknown target
+        }
+        for (let cast in mdCastsFromSource) {
+            this.insertBand(mdTargetsOrdered, mdBandsFromSource[bandIndex], mdCastsFromSource[cast].id, null);
+
+        }
+        mdTargetsOrdered.sort(compareBand); // Now we have a list of MD casts in order, with targets
+        // Now associate each MD aura band on the hunter with the corresponding target from the cast list
+        for (let bandIndex in mdSourceBands.bands) { // Iterate over bands
             let currentBand = mdSourceBands.bands[bandIndex]; 
-            if ( (sourceClass == "Hunter") &&
-                (misdirectionCasts.length < mdSourceBands.bands.length) &&
+            if ((misdirectionCasts.length < mdSourceBands.bands.length) &&
                 (bandIndex == 0)) { // If there are less casts than MD auras, skip the first one -- unknown target if pre-cast
                     console.log("Found pre-cast MD from " + mdSourceBands.name + " ending at " 
                       + currentBand.endTime + ", can't assign target -> ignoring threat");
-                    currentBand.target = null;
+                    currentBand.name = null;
                     continue;
             }
-            if (sourceClass == "Hunter") {
-                currentBand.target = globalMdTargets[unitId][mdCastIndex].name; // Otherwise, assign MD targets in order of time cast
-                currentBand.id = globalMdTargets[unitId][mdCastIndex].id;
+            else { // Otherwise, associate the MD aura band on the hunter with the next cast on the master list's target
+                let targetID = globalMdTargets[unitId][mdCastIndex].targetID;
+                currentBand.name = this.globalUnits[targetID].name; // Otherwise, assign MD targets in order of time cast
+                currentBand.id = targetID;
+                currentBand.duration = currentBand.endTime / 1000.0 - currentBand.startTime / 1000.0; // For debug only
             }
-            else if (sourceClass == "Rogue") {
-                let castStartTime = mdTargetsOrdered[mdCastIndex].startTime;
-                if (((castStartTime + 0.5*1000) < currentBand.startTime) ||
-                    ((castStartTime - 0.5*1000) > currentBand.startTime)) {
-                        console.log("Probable cancelled tricks found:: " + this.globalUnits[unitId].name + " at " + currentBand.endTime);
-                        continue;
-                }
-                currentBand.target = mdTargetsOrdered[mdCastIndex].name;
-                currentBand.id = mdTargetsOrdered[mdCastIndex].id;
+        }
+    }
+
+    setupTricksBands(unitId) {
+        let tricksCastIndex = 0;
+        let tricksSourceBands = globalTricksAuras[unitId][0].bands;
+
+        let tricksTargetsOrdered = [];
+        for (let target in globalTricksTargets[unitId]) {  // Setup array of tricks casts in time order
+            for (let band in globalTricksTargets[unitId][target].bands)
+                this.insertBand(tricksTargetsOrdered, globalTricksTargets[unitId][target].bands[band], globalTricksTargets[unitId][target].id, globalTricksTargets[unitId][target].name);
+        }
+        tricksTargetsOrdered.sort(compareBand);
+
+        for (let bandIndex in tricksSourceBands) { // Iterate over bands to find a target
+            let currentBand = tricksSourceBands[bandIndex]; 
+            let castStartTime = tricksTargetsOrdered[tricksCastIndex].startTime;
+            if (((castStartTime + 0.5*1000) < currentBand.startTime) ||
+                ((castStartTime - 0.5*1000) > currentBand.startTime)) {
+                    currentBand.name = null;
+                    console.log("Probable cancelled tricks found:: " + this.globalUnits[unitId].name + " at " + currentBand.endTime);
+                    continue;
             }
-            else 
-                console.log("Unknown MD class");
-            mdCastIndex++;
+            currentBand.name = tricksTargetsOrdered[tricksCastIndex].name;
+            currentBand.id = tricksTargetsOrdered[tricksCastIndex].id;
+            currentBand.duration = currentBand.endTime / 1000.0 - currentBand.startTime / 1000.0; // For debug only
+            tricksCastIndex++;            
         }
     }
 
@@ -951,7 +989,8 @@ class Fight {
         let startTimes = [];
         for (let sourceID in this.globalUnits) {
             let sourceUnit = this.globalUnits[sourceID];
-            if (sourceUnit.type === "Hunter") { // TODO: Add tricks
+
+            if (sourceUnit.type === "Hunter") {
                 let misdirectionUptime = await fetchWCLMisdirectionUptime(this.reportId + "?", this.start, this.end, sourceUnit.id);
                 misdirectionUptime.source = sourceUnit.id;
                 globalMdAuras[sourceUnit.id] = misdirectionUptime;
@@ -963,16 +1002,20 @@ class Fight {
             else if (this.globalUnits[sourceID].type == "Rogue") {
                 let misdirectionUptime = await fetchWCLTricksUptime(this.reportId + "?", this.start, this.end, sourceUnit.id);
                 misdirectionUptime.source = sourceUnit.id;
-                globalMdAuras[sourceUnit.id] = misdirectionUptime;
+                globalTricksAuras[sourceUnit.id] = misdirectionUptime;
                 let misdirectionCasts = await fetchWCLTricksCasts(this.reportId + "?", this.start, this.end, sourceUnit.id);
                 misdirectionCasts.source = sourceUnit.id;
-                globalMdTargets[sourceUnit.id] = misdirectionCasts;
+                globalTricksTargets[sourceUnit.id] = misdirectionCasts;
                 if (misdirectionCasts.length != 0)
-                    this.setupMDBands(sourceID, misdirectionCasts);
+                    this.setupTricksBands(sourceID, misdirectionCasts);
+            }
+            else if (this.globalUnits[sourceID].type == "Warrior") {
+                // TODO: fix this to query warrior AP to calculate sunder, devestate values
+                //let ap = await fetchWCLAttackPower(this.reportId + "?", this.start, this.end, sourceUnit.id);
             }
 
         }
-        
+        mergeRedirectAuras(); // Concatenate tricks, MD arrays. Would be nice to clean this up at some point to be more efficient
     }
 
     eventToUnit(ev, unit) { // Unit should be "source" or "target"

@@ -176,13 +176,6 @@ async function fetchWCLTricksCasts(path, start, end, source) {
     return json.auras;
 }
 
-async function fetchWCLAttackPower(path, start, end, source) {
-    let query = `report/events/resources/${path}&start=${start}&end=${end}&abilityid=1001&sourceid=${source}`;
-    let json = await fetchWCLv1(query);
-    if (!json) throw "Could not parse report " + path;
-    return json.events;
-}
-
 function mergeRedirectAuras() {
     let totalIndex = Math.max(globalMdAuras.length, globalTricksAuras.length);
     for (let index = 0; index < totalIndex; index++) {

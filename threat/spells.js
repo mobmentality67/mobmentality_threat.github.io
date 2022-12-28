@@ -633,25 +633,47 @@ function handler_threatOnHit(threatValue) {
     }
 }
 
-function getAttackPower() {
-    return 5200; // Major fix required here, pending some decent way to query AP
+function getAttackPower(sourceUnit) {
+    if (sourceUnit.lastAttackPower)
+        return sourceUnit.lastAttackPower;
+    else return 5200; // Major fix required here, pending some decent way to query AP
+}
+
+function setAttackPower(sourceUnit, ev) {
+    if (ev.attackPower != 0 && ev.type != 'damage') // Shockwave event has 0 AP if it's a damage event
+        sourceUnit.lastAttackPower = ev.attackPower;
 }
 
 
 function handler_sunderArmor(threatValue) {
     return (ev, fight) => {
         if (ev.type === "cast") {
-            let sunderThreat = getAttackPower()  * .05 + threatValue; // Needs fix to query AP
+            let sunderThreat = getAttackPower(fight.friendlies[ev.sourceID])  * .05 + threatValue; // Needs fix to query AP
             threatFunctions.sourceThreatenTarget(ev, fight, sunderThreat);
             return;
         }
     }
 }
 
+function handler_bloodthirst(ev, fight) {
+    if (ev.type === "cast") 
+        setAttackPower(fight.friendlies[ev.sourceID], ev);
+    else if (ev.type == "damage")
+        threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
+}
+
+function handler_shockwave(ev, fight) {
+    if (ev.type == 'cast') 
+        setAttackPower(fight.friendlies[ev.sourceID], ev);
+    else {
+        threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
+    }
+}
+
 function handler_devastate(devastateValue) {
     return (ev, fight) => {
         if (ev.type !== "damage" || ev.hitType > 6 || ev.hitType === 0) return;
-        let devThreat = getAttackPower()  * .05 + ev.amount + (ev.absorbed || 0) + devastateValue;
+        let devThreat = getAttackPower(fight.friendlies[ev.sourceID])  * .05 + ev.amount + (ev.absorbed || 0) + devastateValue;
         threatFunctions.sourceThreatenTarget(ev, fight, devThreat);
     }
 }
@@ -1480,10 +1502,10 @@ const spellFunctions = {
 
     /* Warrior: https://github.com/magey/wotlk-warrior/issues/21 */
     12721: handler_damage, //("Deep Wounds"),
-    46968: handler_damage, // Shockwave
+    46968: handler_shockwave, // Shockwave
     
     //TODO : Add tactical mastery talent threat modifier
-    23881: handler_damage, //("Bloodthirst")
+    23881: handler_bloodthirst, //("Bloodthirst")
     23888: handler_zero, //("Bloodthirst"),   //Buff
     23885: handler_zero, //("Bloodthirst"),   //Buff
     23891: handler_heal, // BT heal buff
@@ -1498,7 +1520,7 @@ const spellFunctions = {
     47488: handler_modDamagePlusThreat(1.3, 770), // Shield Slam
 
     //Devastate
-    47498: handler_devastate(315), // Devestate threat = 315 + 5% of AP + dam
+    47498: handler_devastate(315), // Devastate threat = 315 + 5% of AP + dam
 
     // Shield Bash
     72: handler_threatOnHit(36),
@@ -1531,7 +1553,7 @@ const spellFunctions = {
 
     /* Abilities */
     //Sunder Armor
-    11597: handler_sunderArmor(360, "Sunder Armor"),
+    7386: handler_sunderArmor(360, "Sunder Armor"),
 
     //Battleshout
     47436: handler_threatOnBuffUnsplit(78, true, "Battle Shout"), 

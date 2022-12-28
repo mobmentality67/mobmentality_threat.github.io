@@ -587,16 +587,12 @@ class Player extends Unit {
                                 if (talents[0].id < 8) {
                                     this.talents["Tactical Mastery"].rank = 0;
                                 }
-                                if (talents[2].id < 10) {
-                                    this.talents["Defiance"].rank = 0;
-                                }
                                 break;
                             case "Druid":
                                 if (talents[0].id < 15)
                                     this.talents["Nature's Reach"].rank = 0;
                                 if (talents[2].id < 20)
-                                    this.talents["Subtlety"].rank = 0;
-                                
+                                    this.talents["Subtlety"].rank = 0;        
                                 break;
                             case "Paladin" :
                                 if (talents[2].id < 40) {

@@ -302,12 +302,12 @@ const auraImplications = {
         26997: 9634, // Bear Swipe
         26998: 9634, //Demoralizing Roar
         48564: 9634, // mangle bear
-        48566: 9634, // mangle cat
+        48566: 768,  // mangle cat
         33745: 9634, // lacerate
-        6795: 9634, //Growl
-        5229: 9634, //Enrage
+        6795:  9634, //Growl
+        5229:  9634, //Enrage
         17057: 9634, //Furor
-        8983: 9634, //Bash
+        8983:  9634, //Bash
         48570: 768, //Claw
         48572: 768,  //Shred
         48574: 768, //Rake
@@ -315,8 +315,8 @@ const auraImplications = {
         48579: 768, //Ravage
         49800: 768, //Rip
         49803: 768, //Pounce
-        9913: 768, //Prowl
-        9846: 768, //Tiger's Fury
+        9913:  768, //Prowl
+        9846:  768, //Tiger's Fury
         36589: 768, //Dash
     },
     DeathKnight: {

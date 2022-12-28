@@ -70,13 +70,6 @@ const buffMultipliers = {
 // The leaf elements are functions (buffs,rank) => threatCoefficient
 const talents = {
     Warrior: {
-        "Defiance": {
-            maxRank: 3,
-            coeff: function (buffs, rank = 3) {
-                if (!(71 in buffs)) return getThreatCoefficient(1);
-                return getThreatCoefficient(1 + 0.05 * rank* (71 in buffs));
-            }
-        },
         "Improved Berserker Stance": {
             maxRank: 5,
             coeff: function (buffs, rank = 5) {
@@ -344,7 +337,7 @@ const threatFunctions = {
     sourceThreatenTarget(ev, fight, amount, useThreatCoeffs = true, extraCoeff = 1) { // extraCoeff is only used for tooltip text
         let a = fight.eventToUnit(ev, "source");
         let b = fight.eventToUnit(ev, "target");
-        if (!a || !b) {x
+        if (!a || !b) {
             return;
         }
         let coeff = (useThreatCoeffs ? a.threatCoeff(ev.ability) : 1) * extraCoeff;

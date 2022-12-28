@@ -128,7 +128,7 @@
 <div id="info">
     <div id="Wrath">
         This is a fork from the great work done by Voomlz to make the tool compatible in WotLK Classic.
-        Wrath support is in an early alpha state -- much works remain -- from Zachatou (Zachatou#1282) and Mobmentality (mobmentality#9406) -- (Westfall/Benediction). We expect issues and would love your help finding them. Please DM us Discord with any inconsistencies -- a VOD with a threat graph would be incredible for helping compare values. 
+        Wrath support is in an early alpha state -- much works remain -- from Zachatou (Zachatou#1282) and Mobmentality (mobmentality#9406) -- (Westfall/Benediction). We expect issues and would love your help finding them. Please file an issue <a href="https://github.com/mobmentality67/mobmentality_threat.github.io/issues">here</a> or DM us Discord with any inconsistencies -- if you find an issue, a VOD with a threat graph or screenshot of the meter at the end of the fight would be incredible for helping compare values. 
     </div>
     <br>
     <div id="KnownIssues">
@@ -143,7 +143,10 @@
             Warrior AP detection for devestate and sunder armor does not work
         </li>
         <li>
-            Protection warrior threat in general appears inflated by around 6% -- at least partially related to AP detection
+            Vigilance is not detected --> working on manual selection for Vigilance target
+        </li>
+        <li>
+            Protection warrior threat is slightly underestimated -- at least partially related to AP detection + Vigilance
         </li>
          <li>
             Active threat drops (HoS) need to be tested against static threat modifiers. Current implementation assumes they are affected

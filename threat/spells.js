@@ -279,6 +279,7 @@ for (let k in buffMultipliers) notableBuffs[k] = true;
 for (let k in invulnerabilityBuffs) notableBuffs[k] = true;
 for (let k in aggroLossBuffs) notableBuffs[k] = true;
 for (let k in fixateBuffs) notableBuffs[k] = true;
+for (let k in stanceBuffs) notableBuffs[k] = true;
 
 const auraImplications = {
     Warrior: {
@@ -324,7 +325,6 @@ const auraImplications = {
         48266: 48266, // Blood Presence,
         48265: 48265, // Unholy Presence,
         50475: 48266, // Blood presence self-heal
-        49206: 48265, // Summon garg -- remove this when blood heal correctly detected for UH
     }
 }
 

@@ -427,14 +427,16 @@ class Unit {
                 }
             } else if (t === "death") {
                 if (Unit.eventToKey(events[i], "target") !== key) continue;
-                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguishcast
+                if (this.type === "Hunter") continue; // Feign Death is impossible to distinguish
                 this.dies = true;
             }
         }
+        this.buffs = initialBuffs;
+
         if (this.type == "DeathKnight") { // If no presence detected, set frost (doesn't detect evil face, shouldn't matter)
             setDefaultPresence(this, initialBuffs);
         }
-        this.buffs = initialBuffs;
+
         this.initialCoeff = this.threatCoeff();
         if (this.initialCoeff > 1) this.tank = true;
     }
@@ -541,7 +543,7 @@ class Player extends Unit {
         this.checkWarrior(events); // Extra stance detection
         this.checkPaladin(events); // Extra Righteous Fury detection
         //this.checkBear(events); // Extra Bear detection
-        this.checkInitalStatus(); // Gloves and cloack enchants, talents and buffs
+        this.checkInitalStatus(); // Gloves and cloak enchants, talents and buffs
 
         let a = info.initialBuffs;
         for (let k in a) {
@@ -618,7 +620,8 @@ class Player extends Unit {
                                     this.talents["Destructive Reach"].rank = 0;
                                 break;
                             case "DeathKnight": 
-                                if ((talents[2].id >= 5) && (talents[2].id < 20)) 
+                                // Set Subversion = 0 if: some points in blood, but not full blood or full unholy
+                                if ((talents[0].id < 3) || (talents[2].id > 50)) 
                                     this.talents["Subversion"].rank = 0;
                                 break;
                         }

@@ -527,7 +527,7 @@ class Unit {
 
 // Class for players and pets
 class Player extends Unit {
-    constructor(key, info, events, tranquilAir = false) {
+    constructor(key, info, events) {
         super(key, info.name, info.type, events);
         this.global = info;
         this.talents = info.talents;
@@ -812,11 +812,7 @@ class NPC extends Unit {
             colorByClass = x;
             recolorPlot()
         });
-        createCheckbox(el_div, fight.tranquilAir, "Tranquil Air", x => {
-            fight.tranquilAir = x;
-            fight.process();
-            selectEnemy();
-        });
+
         createCheckbox(el_div, splitHealingThreatOption, "Split healing threat", x => {
             splitHealingThreatOption = x;
             fight.process();
@@ -886,7 +882,6 @@ class Fight {
         this.globalUnits = globalUnits;
         this.faction = faction;
         this.reportId = reportId;
-        this.tranquilAir = false;
     }
 
     insertBand(allTargetBands, targetBand, targetID, name) {
@@ -1012,7 +1007,7 @@ class Fight {
             if (t === "NPC" || t === "Boss" || t === "Pet") {
                 a[k] = new NPC(k, u, this.events, this);
             } else {
-                a[k] = new Player(k, this.globalUnits[id], this.events, this.tranquilAir);
+                a[k] = new Player(k, this.globalUnits[id], this.events);
             }
             this.units[k] = a[k];
         }
@@ -1043,7 +1038,7 @@ class Fight {
             if (t === "NPC" || t === "Boss" || t === "Pet") {
                 return;
             } else {
-                a[k] = new Player(k, this.globalUnits[id], this.events, this.tranquilAir);
+                a[k] = new Player(k, this.globalUnits[id], this.events);
             }
             this.units[k] = a[k];
         }

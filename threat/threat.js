@@ -561,7 +561,7 @@ class Player extends Unit {
         let overrideTalents = false;
         let elementById = document.getElementById("buttonOverrideTalents");
         if (elementById) {
-            if (elementById.value) {
+            if (elementById.checked) {
                 overrideTalents = true;
             }
         }

@@ -810,7 +810,7 @@ function handler_selfDamageOnSpellReflect() {
     }
 }
 
-function handler_hatefulstrike(mainTankThreat, offTankThreat) {
+function handler_hatefulstrike(mainTankThreat) {
     return (ev, fight) => {
         // hitType 0=miss, 7=dodge, 8=parry, 10 = immune, 14=resist, ...
         if ((ev.type !== "damage") || (ev.hitType > 6 && ev.hitType !== 10 && ev.hitType !== 14) || ev.hitType === 0) return;
@@ -1201,10 +1201,7 @@ const spellFunctions = {
     29208: handler_bossThreatWipeOnCast, // Noth blink (first spell id)
     29210: handler_bossThreatWipeOnCast, // Noth blink (second spell id)
 
-
-    // testing if it works like Patchwerk ? Only on off tank?
-    33813: handler_hatefulstrike(1500, 0), // Gruul's hurtfulstrike
-    59192: handler_hatefulstrike(1500, 2500), // Patchwerk's hateful strike. TODO: Check WOTLK threat value, just an approximation now
+    59192: handler_hatefulstrike(0), // Patchwerk's hateful strike. TODO: Check WOTLK threat value, just an approximation now
 
     //17624: handler_vanish, // Flask of Petrification
 

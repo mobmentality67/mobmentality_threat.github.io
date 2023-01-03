@@ -609,7 +609,7 @@ class Player extends Unit {
                                 break;
                             case "Warlock": 
                                 this.talents["Improved Drain Soul"].rank = 0; // Assume this is not taken regardless
-                                if (talents[2].id < 20) 
+                                if (talents[2].id < 31) 
                                     this.talents["Destructive Reach"].rank = 0;
                                 break;
                             case "DeathKnight": 

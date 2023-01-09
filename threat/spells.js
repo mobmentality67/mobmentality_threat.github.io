@@ -325,6 +325,7 @@ const auraImplications = {
         48266: 48266, // Blood Presence,
         48265: 48265, // Unholy Presence,
         50475: 48266, // Blood presence self-heal
+        49206: 48265, // Assume gary is cast in unholy presence to detect permanent UH stance
     }
 }
 

@@ -226,6 +226,7 @@ const invulnerabilityBuffs = {
     6724: "Light of Elune",
     586: "Fade",
     55342: "Mirror Image",
+    19263: "Deterrence",
 }
 // These make dots yellow-bordered
 const aggroLossBuffs = {

@@ -216,7 +216,7 @@ class ThreatTrace {
         let s = "";
         for (let k in this.fixates) s += "+" + k;
         this.fixateHistory.push(s.substring(1));
-        this.invulnerabilityHistory.push(this.target.invulnerable);
+        this.invulnerabilityHistory.push(this.target.isInvulnerable());
         this.currentThreat = threat;
     }
 
@@ -479,6 +479,10 @@ class Unit {
         }
         return c;
     }
+    isInvulnerable() {
+        return Object.keys(this.buffs).filter(x => x in invulnerabilityBuffs);
+    }
+
 
     get invulnerable() {
         return Object.keys(this.buffs).filter(x => x in invulnerabilityBuffs);
@@ -1078,7 +1082,6 @@ class Fight {
                         let target = this.eventToUnit(ev, "target");
                         target.insignificance = true;
                     }
-                    break;
                 case "refreshbuff":
                 case "refreshdebuff":
                     i = ev.ability.guid;
@@ -1103,13 +1106,11 @@ class Fight {
                         let target = this.eventToUnit(ev, "target");
                         target.insignificance = false;
                     }
-                    break;
                 case "removedebuff":
                     if (ev.ability.guid === 40618 || ev.ability.guid === 40604) {
                         let target = this.eventToUnit(ev, "target");
                         target.insignificance = false;
                     }
-                    break;
                     i = ev.ability.guid;
                     if (!(i in notableBuffs)) break;
                     u = this.eventToUnit(ev, "target");

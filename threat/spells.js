@@ -32,7 +32,7 @@ const baseThreatCoefficients = {
 }
 
 const buffNames = {
-    1038: "Hand of Salvation",
+    1308: "Hand of Salvation",
     71: "Defensive Stance",
     2457: "Battle Stance",
     2458: "Berserker Stance",
@@ -220,7 +220,6 @@ const invulnerabilityBuffs = {
     498: "Divine Protection",
     642: "Divine Shield",
     10278: "Hand of Protection",
-    1038: "Hand of Salvation",
     11958: "Ice Block",
     19752: "Divine Intervention",
     6724: "Light of Elune",
@@ -239,6 +238,7 @@ const aggroLossBuffs = {
     23603: true, // Nefarian: Wild Polymorph
     26580: true, // Princess Yauj: Fear
     28410: true, // Chains of Kel'Thuzad
+    1038:  true, // Hand of Salvation,
 }
 // These make dots orange
 const fixateBuffs = {

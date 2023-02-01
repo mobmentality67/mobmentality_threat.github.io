@@ -217,7 +217,6 @@ const talents = {
 
 // These make dots green-bordered
 const invulnerabilityBuffs = {
-    498: "Divine Protection",
     642: "Divine Shield",
     10278: "Hand of Protection",
     11958: "Ice Block",
@@ -1248,8 +1247,7 @@ const spellFunctions = {
     1038: handler_partialThreatWipeOnEvent(0.02), // hand of salv; 2% per threat for 10s untalented
 
     31789: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Righteous Defense
-    67845: threatFunctions.concat(handler_righteousDefense, handler_markSourceOnMiss(borders.taunt)), // Hand of Reckoning
-    68475: handler_modDamage(1.00), // Hand of Reckoning
+    62124: threatFunctions.concat(handler_taunt, handler_damage, handler_markSourceOnMiss(borders.taunt)), // Hand of Reckoning
     53409: handler_zero, // Mana from Judgement of Wisdom
 
     48942: handler_zero, // Devotion Aura

@@ -598,6 +598,14 @@ class Player extends Unit {
                                     this.talents["Fanaticism"].rank = 0;
                                 }
                                 break;
+                            case "Mage" :
+                                if (talents[0].id < 40) {
+                                    this.talents["Arcane Subtlety"].rank = 0;
+                                }
+                                if (talents[1].id < 51) {
+                                    this.talents["Burning Soul"].rank = 0;
+                                }
+                                break;
                             case "Shaman" :
                                 if (talents[0].id < 28) {
                                     this.talents["Elemental Precision (fire)"].rank = 0;

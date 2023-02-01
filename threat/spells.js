@@ -218,16 +218,14 @@ const talents = {
 // These make dots green-bordered
 const invulnerabilityBuffs = {
     498: "Divine Protection",
-    5573: "Divine Protection",
     642: "Divine Shield",
-    1020: "Divine Shield",
-    1022: "Hand of Protection",
-    5599: "Hand of Protection",
     10278: "Hand of Protection",
+    1038: "Hand of Salvation",
     11958: "Ice Block",
     19752: "Divine Intervention",
     6724: "Light of Elune",
     586: "Fade",
+    55342: "Mirror Image",
 }
 // These make dots yellow-bordered
 const aggroLossBuffs = {

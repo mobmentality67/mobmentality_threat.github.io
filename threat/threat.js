@@ -444,8 +444,9 @@ class Unit {
             let md = mdAuraForThis[i];
             for (let j in md.bands) {
                 let band = md.bands[j];
-                // Allow 2.5 seconds leeway for projectile travel time
-                if (ev.timestamp >= band.startTime && band.endTime + (2.5 * 1000) >= ev.timestamp) {
+                let leeway = 2500; 
+                if (md.type == 'Rogue') leeway = 0.0; // Allow 2.5 seconds leeway for hunters for projectile travel time
+                if (ev.timestamp >= band.startTime && band.endTime + leeway >= ev.timestamp) {
                     let b = fight.eventToUnit(ev, "target");
                     if (b) {
                         if (band.name != null) { // If this is an unknown target from pre-cast, don't add the threat to anyone

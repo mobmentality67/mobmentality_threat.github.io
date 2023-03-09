@@ -325,11 +325,6 @@ const auraImplications = {
     }
 }
 
-const tricksRecipients = {
-    57933: true,
-    396936: true,
-};
-
 const threatFunctions = {
     sourceThreatenTarget(ev, fight, amount, useThreatCoeffs = true, extraCoeff = 1) { // extraCoeff is only used for tooltip text
         let a = fight.eventToUnit(ev, "source");
@@ -467,8 +462,8 @@ function handler_basic(ev, fight) {
         case "damage":
             let source = fight.eventToUnit(ev, "source");
             if (source) {
-                if (ev.sourceIsFriendly && source.handleMisdirectionDamage(ev.amount, ev, fight)) {
-                } else {
+                if (ev.sourceIsFriendly && source.handleMisdirectionDamage(ev.amount, ev, fight)) {} 
+                else {
                     threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
                 }
             }
@@ -615,7 +610,11 @@ function handler_modDamagePlusThreat(multiplier, bonus) {
 
 function handler_damage(ev, fight) {
     if (ev.type !== "damage") return;
-    threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0));
+    let source = fight.eventToUnit(ev, "source");
+    let MD = source.handleMisdirectionDamage(ev.amount, ev, fight);
+    if (!MD) {
+        threatFunctions.sourceThreatenTarget(ev, fight, ev.amount + (ev.absorbed || 0))
+    }
 }
 
 function handler_heal(ev, fight) {
@@ -1028,7 +1027,7 @@ function handler_partialThreatWipeOnEvent(pct) {
                         // scale up by x%
                         currentThreat = currentThreat * (1 + (pct / (1 - pct)));
                         // Then remove threat for the amount of time spent in invis
-                        currentThreat = currentThreat * nbSecondElapsed / timeToFade * (1-(pct * timeToFade));
+                        currentThreat = currentThreat * (1-(pct * timeToFade * nbSecondElapsed / timeToFade));
 
                         enemies[k].setThreat(u.key, currentThreat, ev.timestamp, ev.ability.name);
                     }
@@ -1282,8 +1281,7 @@ const spellFunctions = {
 
 // Mage
     10181: handler_damage, // Frostbolt
-    66: handler_partialThreatWipeOnEvent(.333), // invisibility : 20% per second of buff
-    // TODO: mirror image threat suspension
+    66: handler_partialThreatWipeOnEvent(.333333), // invisibility : 20% per second of buff
 
 // Rogue
     1856: handler_vanish,
@@ -1742,6 +1740,9 @@ const spellFunctions = {
 
     /* Items */
     13494: handler_zero, //("Manual Crowd Pummeler"),
+
+    // End known spells
+    1000000: handler_damage // Default damage handler
 }
 
 let zeroThreatSpells = [];

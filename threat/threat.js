@@ -950,6 +950,10 @@ class Fight {
         tricksTargetsOrdered.sort(compareBand);
 
         for (let bandIndex in tricksSourceBands) { // Iterate over bands to find a target
+            if (tricksCastIndex >= tricksTargetsOrdered.length) {
+                console.log("Source and target bands mismatch for tricks; probable cancel"); 
+                break; // Mismatched sizes if rogue cancelled tricks
+            }
             let currentBand = tricksSourceBands[bandIndex]; 
             let castStartTime = tricksTargetsOrdered[tricksCastIndex].startTime;
             if (((castStartTime + 0.5*1000) < currentBand.startTime) ||

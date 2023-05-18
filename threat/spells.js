@@ -609,7 +609,7 @@ function handler_modDamagePlusThreat(multiplier, bonus) {
 }
 
 function handler_damage(ev, fight) {
-    if (ev.type !== "damage") return;
+    if (ev.type !== "damage" || ev.sourceIsFriendly == false) return;
     let source = fight.eventToUnit(ev, "source");
     let MD = source.handleMisdirectionDamage(ev.amount, ev, fight);
     if (!MD) {
